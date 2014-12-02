@@ -1,0 +1,93 @@
+﻿@using SIGA.Entities.Models
+@model SIGA.Entities.Models.OrdemServico
+
+@{
+    ViewBag.Title = "MudarStatusOS";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#@Html.IdFor(model => model.HoraEntregaOrdemServico)").mask("99:99").ForceNumericOnly();
+    });
+</script>
+<h4>Ordem de Serviço</h4>
+<br />
+<h3>Deseja realmente mudar o status do registro abaixo?</h3>
+<div>
+
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.NomeOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NomeOrdemServico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusOrdemServico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataPedidoOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataPedidoOrdemServico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataEntregaOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataEntregaOrdemServico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TipoOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TipoOrdemServico)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        if (Model.StatusOrdemServico == OrdemServico.StatusOrdemServicos.EmTransporte)
+        {
+            <br />
+            <div class="form-horizontal">
+                <div class="form-group">
+                    @Html.Label("Data da Entregua", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.DataEntregaOrdemServico, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.DataEntregaOrdemServico, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.Label("Hora da Entregua", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-2">
+                        @Html.EditorFor(model => model.HoraEntregaOrdemServico, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.HoraEntregaOrdemServico, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="form-actions no-color">
+            @Html.ActionLink("NÃO", "IndexGerenciarOSAtendente", null, new { @class = "btn btn-danger" })
+            <input type="submit" value="SIM" class="btn btn-primary" />
+        </div>
+    }
+</div>

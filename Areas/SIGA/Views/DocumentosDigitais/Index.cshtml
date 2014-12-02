@@ -1,0 +1,54 @@
+﻿@using GridMvc;
+@using GridMvc.Html
+
+@model IEnumerable<SIGA.Entities.Models.DocumentoDigital>
+
+@{
+    ViewBag.Title = "Documento Digital";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="">
+    <p class="widget-title">
+        <a class="btn btn-primary btn-sm" href="@Url.Action("Create")">
+            Criar Novo
+            <i class="ace-icon fa fa-file-o icon-on-right bigger-110">
+            </i>
+        </a>
+    </p>
+</div>
+
+
+<div class="widget-box">
+    <div class="widget-header">
+        <h5 class="widget-title bigger lighter">
+            <i class="ace-icon fa fa-table"></i>
+            Documento Digital
+        </h5>
+    </div>
+
+    <div class="widget-body">
+        <div class="widget-main no-padding">
+            <div>
+                @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
+                    {
+                        g.Add(n => n.Documento.DescricaoDocumento).Titled("Documento");
+                        g.Add(n => n.DataCriacao).Titled("Data Criação").Format("{0:dd-MM-yyyy}");
+                        g.Add()
+                            .Css("action-buttons")
+                            .SetWidth(100)
+                            .Titled("Ação")
+                            .Encoded(false)
+                            .Sanitized(false)
+                            .RenderValueAs(p =>
+                                @Html.ActionLink(" ", "Details", new { id = p.IdDocumentoDigital }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Edit", new { id = p.IdDocumentoDigital }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Delete", new { id = p.IdDocumentoDigital }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Arquivo", new { id = p.IdDocumentoDigital }, new { @class = "blue ace-icon fa fa-file-text-o bigger-140", @title = "Visualizar Arquivo", @data_rel = "tooltip" }).ToHtmlString());
+
+                    }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+            </div>
+
+        </div>
+    </div>
+</div>

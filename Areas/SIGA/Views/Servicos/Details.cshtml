@@ -1,0 +1,33 @@
+﻿@model SIGA.Entities.Models.Servico
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Serviçoo</h4>
+	<hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Descricao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Descricao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.FormaDeCalculo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.FormaDeCalculo)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Editar", "Edit", new { id = Model.IdServico }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

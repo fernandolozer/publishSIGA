@@ -1,0 +1,53 @@
+﻿@using GridMvc.Html
+@model IEnumerable<SIGA.Entities.Models.Lote>
+
+@{
+    ViewBag.Title = "Lote";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<div class="col-sm-2">
+        <p class="widget-title">
+            <a class="btn btn-primary btn-sm" href="@Url.Action("Create")">
+                Criar Novo
+                <i class="ace-icon fa fa-file-o icon-on-right bigger-110">
+                </i>
+            </a>
+        </p>
+    </div>*@
+
+@using (Html.BeginForm())
+{
+    <div class="widget-box">
+        <div class="widget-header">
+            <h4 class="widget-title">Pesquisar Lotes</h4>
+        </div>
+        <div class="widget-body">
+            <div class="widget-main">
+                <form class="form-inline">
+                    <div class="col-xs-6 col-sm-4">
+                        @Html.DropDownList("IdCliente", null, "[ Cliente ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento" })
+                    </div>
+                    <input type="submit" value="Pesquisar" class="btn btn-info btn-sm" />
+                </form>
+            </div>
+            @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
+                    {
+                        g.Add(n => n.Caixa.NomeCaixa).Titled("Caixa");
+                        g.Add(n => n.NomeLote).Titled("Nome");
+                        g.Add(n => n.NumeroLote).Titled("Número");
+                        g.Add()
+                            .Css("action-buttons")
+                            .SetWidth(100)
+                            .Titled("Ação")
+                            .Encoded(false)
+                            .Sanitized(false)
+                            .RenderValueAs(p =>
+                                @Html.ActionLink(" ", "Details", new { id = p.IdLote }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Edit", new { id = p.IdLote }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Delete", new { id = p.IdLote }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString());
+
+                    }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+        </div>
+    </div>
+}

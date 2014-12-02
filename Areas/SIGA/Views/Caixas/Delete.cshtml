@@ -1,0 +1,71 @@
+﻿@model SIGA.Entities.Models.Caixa
+
+@{
+    ViewBag.Title = "Caixa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h3>Tem certeza que deseja excluir este registro?</h3>
+<div>
+    <h4>Caixa</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.EstruturaFisica.NomeEstrutura)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EstruturaFisica.NomeEstrutura)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Galpao.NomeGalpao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Galpao.NomeGalpao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NumeroCaixa)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NumeroCaixa)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NumeroCaixaCliente)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NumeroCaixaCliente)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NomeCaixa)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NomeCaixa)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.QuantidadeDeLotes)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.QuantidadeDeLotes)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Excluir" class="btn btn-default" /> |
+            @Html.ActionLink("Voltar", "Index")
+        </div>
+    }
+</div>

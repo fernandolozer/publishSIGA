@@ -1,0 +1,157 @@
+﻿@using GridMvc.Html
+@using SIGA.Entities.Models
+@using SIGA.Infrastructure.Extension
+
+@model IEnumerable<SIGA.Entities.Models.Documento>
+
+@{
+    ViewBag.Title = "Documento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+
+    var urlTipoDoc = Url.Content("~/SIGA/Documentos/CarregaListaTiposDocumentosSetor");
+
+    var idCliente = ViewData["IdCliente"];
+    var idsetor = ViewData["IdSetor"];
+    var idTemporalidade = ViewData["IdTemporalidade"];
+    var modoDestino = ViewData["ModoDestino"];
+}
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#idClienteTipoDocumento").change(function () {
+            var elements = "";
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Setor ]</option>';
+                $('#idSetorTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@url',
+                type: 'POST',
+                data: { idCliente: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Setor ]</option>';
+                    $.each(data, function () {
+                        elements = elements + '<option value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                    });
+                    $('#idSetorTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });
+
+
+
+        if ($("#idSetorTipoDocumento option:selected").val() != "") {
+            $("#idSetorTipoDocumento").prop("disabled", false);
+        }
+
+    });
+
+</script>
+
+@using (Html.BeginForm())
+{
+    <div class="widget-box">
+        <div class="widget-header">
+            <h4 class="widget-title">Pesquisar Documentos</h4>
+        </div>
+        <div class="widget-body">
+            <div class="widget-main">
+                <div>
+                    <form class="form-inline">
+                        <div class="col-xs-6 col-sm-3">
+                            @Html.DropDownList("IdCliente", null, "[ Cliente ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento" })
+                        </div>
+                        <div class="col-xs-6 col-sm-3">
+                            @Html.DropDownList("IdSetor", null, "[ Setor ]", htmlAttributes: new { @class = "form-control", @disabled = "disabled", @id = "idSetorTipoDocumento" })
+                        </div>
+                        @*<div class="col-xs-6 col-sm-2">
+                                @Html.DropDownList("IdDescritor", null, "[ Descritor ]", htmlAttributes: new { @class = "form-control" })
+                            </div>*@
+                        <div class="col-xs-6 col-sm-5">
+                            @Html.TextBox("txtDescricao", null, htmlAttributes: new { @class = "form-control text-box single-line", @placeholder = "Descrição do Documento..." })
+                        </div>
+
+                        <input type="submit" value="Pesquisar" class="btn btn-info btn-sm" />
+
+                        @*<button type="button" class="btn btn-info btn-sm">
+                                <i class="ace-icon fa fa-search bigger-110"></i>Pesquisar
+                            </button>*@
+                    </form>
+                </div>
+            </div>
+
+            @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
+                    {
+                        g.Add(n => n.Cliente.NomeCliente).SetWidth(230).Titled("Cliente");
+                        g.Add(n => n.Setor.NomeSetor).SetWidth(180).Titled("Setor");
+                        g.Add(n => n.Lote.NumeroLote).SetWidth(140).Titled("Número Lote");
+                        g.Add(n => n.Lote.Caixa.NomeCaixa).SetWidth(250).Titled("Nome da Caixa");
+                        g.Add(n => n.DescricaoDocumento).Titled("Descrição");
+                        //g.Add(n => n.Disponivel).Titled("Disponível?").RenderValueAs(u => RetornaNomeStatus(u)).Encoded(false);
+                        g.Add(n => n.Disponivel).Titled("Disponível?").Encoded(false).Sanitized(false).RenderValueAs(u =>
+                            u.Disponivel == false
+                        ?
+                        @Html.ActionLink("Não", "VerificaDisponibilidadeDocumento", new { id = u.IdDocumento }, new { @title = "Verificar Histórico", @data_rel = "tooltip" }).ToHtmlString()
+                        :
+                        "Sim");
+
+                        if (User.IsInRole("Administrador") || User.IsInRole("Funcionário"))
+                        {
+                            g.Add()
+                                .Css("action-buttons")
+                                .SetWidth(120)
+                                .Titled("Ação")
+                                .Encoded(false)
+                                .Sanitized(false)
+                                .RenderValueAs(p =>
+                                    p.Disponivel
+                                    ?
+                                    @Html.ActionLink(" ", "IncluirNaOS", new { id = p.IdDocumento }, new { @class = "red ace-icon fa  fa-shopping-cart bigger-140", @title = "Incluir na OS", @data_rel = "tooltip" }).ToHtmlString() +
+                                    @Html.ActionLink(" ", "Details", new { id = p.IdDocumento }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                    @Html.ActionLink(" ", "Edit", new { id = p.IdDocumento }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
+                                    @Html.ActionLink(" ", "Delete", new { id = p.IdDocumento }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString()
+                                    :
+                                    @Html.ActionLink(" ", "Details", new { id = p.IdDocumento }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                    @Html.ActionLink(" ", "Edit", new { id = p.IdDocumento }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
+                                    @Html.ActionLink(" ", "Delete", new { id = p.IdDocumento }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString());
+                        }
+                        else
+                        {
+
+                            g.Add()
+                                 .Css("action-buttons")
+                                 .SetWidth(80)
+                                 .Titled("Ação")
+                                 .Encoded(false)
+                                 .Sanitized(false)
+                                 .RenderValueAs(p =>
+                                     p.Disponivel
+                                     ?
+                                     @Html.ActionLink(" ", "IncluirNaOS", new { id = p.IdDocumento }, new { @class = "red ace-icon fa  fa-shopping-cart bigger-140", @title = "Incluir na OS", @data_rel = "tooltip" }).ToHtmlString()
+                                     :
+                                     null);
+                        }
+                    }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+
+            @helper RetornaNomeStatus(Documento documento)
+{
+    string retorno = string.Empty;
+    switch (documento.Disponivel)
+    {
+        case true:
+            retorno = "Sim";
+            break;
+        case false:
+            retorno = "Não";
+            break;
+    }
+    <text>@retorno</text>
+}
+        </div>
+    </div>
+}

@@ -1,0 +1,49 @@
+﻿@model SIGA.Entities.Models.Lote
+
+@{
+    ViewBag.Title = "Lote";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Lote</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Caixa.NumeroCaixa)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Caixa.NumeroCaixa)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NumeroLote)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NumeroLote)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NomeLote)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NomeLote)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PercentualLoteCheio)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PercentualLoteCheio)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdLote }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

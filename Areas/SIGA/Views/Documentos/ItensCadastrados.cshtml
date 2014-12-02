@@ -1,0 +1,49 @@
+﻿@model IEnumerable<SIGA.Entities.Models.Documento>
+
+@{
+    Layout = null;
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>10 (Dez) Últimos Documentos Cadastrados</strong>
+    </div>
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.DescricaoDocumento)
+            </th>
+            @*<th>
+                Tipo Documento
+            </th>*@
+            <th style="width: 80px">
+                Ações
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DescricaoDocumento)
+                </td>
+                @*<td>
+                    @Html.DisplayFor(modelItem => item.ClienteTipoDocumento.TipoDocumento.NomeTipoDocumento)
+                </td>*@
+                <td>
+                    <div class="action-buttons">
+                        <a class="green" href="@Url.Action("Edit", new { id = item.IdDocumento })">
+                            <i class="ace-icon fa fa-pencil bigger-140"></i>
+                        </a>
+
+                        <a class="red" href="@Url.Action("Delete", new { id = item.IdDocumento })">
+                            <i class="ace-icon fa fa-trash-o bigger-140"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
+
+    </table>
+
+</div>

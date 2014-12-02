@@ -1,0 +1,128 @@
+﻿@model SIGA.Web.Models.LoginViewModel
+
+@{
+    ViewBag.Title = "Log in";
+}
+
+<div class="login-container">
+    <div class="center">
+        <h1>
+            <i class="fa fa-folder-open red"></i>
+            <span class="red">SIGA</span>
+            <span class="grey" id="id-text2">Web</span>
+        </h1>
+        @*<h4 class="grey" id="id-company-text">&copy; PRÓ-MEMÓRIA</h4>*@
+    </div>
+
+    <div class="space-6"></div>
+
+    <div class="position-relative">
+        <div id="login-box" class="login-box visible widget-box no-border">
+            <div class="widget-body">
+                <div class="widget-main">
+                    <h4 class="header red lighter bigger">
+                        <i class="ace-icon fa fa-coffee red"></i>
+                        Insira suas informações
+                    </h4>
+
+                    <div class="space-6"></div>
+                    <section id="loginForm">
+                        @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true)
+
+                            <label class="block clearfix">
+                                <span class="block input-icon input-icon-right">
+                                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "Usuário" })
+                                    @Html.ValidationMessageFor(m => m.UserName)
+                                    <i class="ace-icon fa fa-user"></i>
+                                </span>
+                            </label>
+
+
+                            <label class="block clearfix">
+                                <span class="block input-icon input-icon-right">
+                                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Senha" })
+                                    @Html.ValidationMessageFor(m => m.Password)
+                                    <i class="ace-icon fa fa-lock"></i>
+                                </span>
+                            </label>
+
+                            <div class="space"></div>
+
+                            <div class="clearfix">
+                                @*<label class="grey">
+                                    @Html.CheckBoxFor(m => m.RememberMe)
+                                    @Html.LabelFor(m => m.RememberMe)
+                                </label>*@
+
+                                <button type="submit" class="width-35 pull-right btn btn-sm btn-danger">
+                                    <i class="ace-icon fa fa-key"></i>
+                                    <span class="bigger-110">Login</span>
+                                </button>
+                            </div>
+
+                            <div class="space-4"></div>
+
+                        }
+                    </section>
+                </div>
+
+                <div class="toolbar clearfix">
+                    @*<div>
+                        <a href="#" data-target="#forgot-box" class="forgot-password-link">
+                            <i class="ace-icon fa fa-arrow-left"></i>
+                            Esqueceu sua senha?
+                        </a>
+                    </div>*@
+                </div>
+            </div>
+        </div>
+
+        <div id="forgot-box" class="forgot-box widget-box no-border">
+            <div class="widget-body">
+                <div class="widget-main">
+                    <h4 class="header red lighter bigger">
+                        <i class="ace-icon fa fa-key"></i>
+                        Recuperar Senha 
+                    </h4>
+
+                    <div class="space-6"></div>
+                    <p>
+                        Digite seu e-mail para receber instruções
+                    </p>
+
+                    <form>
+                        <fieldset>
+                            <label class="block clearfix">
+                                <span class="block input-icon input-icon-right">
+                                    <input type="email" class="form-control" placeholder="Email" />
+                                    <i class="ace-icon fa fa-envelope"></i>
+                                </span>
+                            </label>
+
+                            <div class="clearfix">
+                                <button type="button" class="width-35 pull-right btn btn-sm btn-danger">
+                                    <i class="ace-icon fa fa-lightbulb-o"></i>
+                                    <span class="bigger-110">Envie!</span>
+                                </button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div><!-- /.widget-main -->
+
+                <div class="toolbar center">
+                    <a href="#" data-target="#login-box" class="back-to-login-link">
+                        Voltar para o login
+                        <i class="ace-icon fa fa-arrow-right"></i>
+                    </a>
+                </div>
+
+
+            </div><!-- /.widget-body -->
+        </div><!-- /.forgot-box -->
+
+
+    </div>
+</div>

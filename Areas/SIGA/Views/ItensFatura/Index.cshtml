@@ -1,0 +1,70 @@
+﻿@using SIGA.Web.Helpers
+@model IEnumerable<SIGA.Entities.Models.ItensFatura>
+
+@{
+    Layout = null;
+    decimal total = 0;
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Itens da Fatura</strong>
+    </div>
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ItensContrato.Servico.Descricao)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantidade)
+            </th>
+            <th>
+                Valor Unitario
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Valor)
+            </th>
+            <th>
+                @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-plus'></span> Novo", "Add", "Create", "ItensFatura", routeValues: new { IdFatura = ViewBag.IdFatura }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-primary pull-right" })
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            total = total + item.Valor;
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ItensContrato.Servico.Descricao)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantidade)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ItensContrato.Valor)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Valor)
+                </td>
+                <td>
+                    <div class="pull-right">
+                        @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-pencil'></span>", "Edit", "Edit", "ItensFatura", routeValues: new { id = item.IdItensFatura }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-default" })
+                        &nbsp;
+                        @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-trash'></span>", "Delete", "Delete", "ItensFatura", routeValues: new { id = item.IdItensFatura }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-danger" })
+
+                    </div>
+
+                </td>
+            </tr>
+        }
+        <tr>
+            <td colspan="3" align="right">Total: </td>
+            <td><strong> R$ @total.ToString("0.00") </strong></td>
+            <td></td>
+        </tr>
+
+    </table>
+
+</div>
+
+@Scripts.Render("~/bundles/modalform")
+

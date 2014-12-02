@@ -1,0 +1,81 @@
+﻿@using GridMvc.Html
+@using SIGA.Entities.Models
+@model System.Collections.Generic.List<SIGA.Entities.Models.OrdemServico>
+
+@{
+    ViewBag.Title = "Gerenciar OS";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-sm-2">
+    <p class="widget-title">
+
+    </p>
+</div>
+
+<div class="widget-box">
+    <div class="widget-header">
+        <h5 class="widget-title bigger lighter">
+            <i class="ace-icon fa fa-table"></i>
+            Ordem de Serviço
+        </h5>
+    </div>
+
+    <div class="widget-body">
+        <div class="widget-main no-padding">
+            <div>
+                @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
+                    {
+                        g.Add(n => n.NomeOrdemServico).Titled("Nome");
+                        g.Add(n => n.StatusOrdemServico).Titled("Status").RenderValueAs(u => RetornaNomeStatus(u)).Encoded(false);
+                        g.Add(n => n.DataPedidoOrdemServico).Titled("Data Pedido").Format("{0:dd-MM-yyyy}");
+                        g.Add(n => n.TipoOrdemServico).Titled("Tipo");
+                        g.Add()
+                            .Css("action-buttons")
+                            .SetWidth(80)
+                            .Titled("Ação")
+                            .Encoded(false)
+                            .Sanitized(false)
+                            .RenderValueAs(p =>
+                                p.StatusOrdemServico == OrdemServico.StatusOrdemServicos.Entregue
+                                ?
+                                @Html.ActionLink(" ", "Edit", new { id = p.IdOrdemServico }, new { @class = "green ace-icon fa fa-search-plus bigger-140", @title = "Visualizar", @data_rel = "tooltip" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "EntregarOS", new { id = p.IdOrdemServico }, new { @class = "blue ace-icon fa fa-share-square bigger-140", @title = "Entregar OS", @data_rel = "tooltip" }).ToHtmlString()
+                                :
+                                @Html.ActionLink(" ", "Edit", new { id = p.IdOrdemServico }, new { @class = "green ace-icon fa fa-search-plus bigger-140", @title = "Visualizar", @data_rel = "tooltip" }).ToHtmlString());
+                    }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+
+                @helper RetornaNomeStatus(OrdemServico os)
+{
+    string retorno = string.Empty;
+    switch (os.StatusOrdemServico)
+    {
+        case OrdemServico.StatusOrdemServicos.Aberto:
+            retorno = "Aberto";
+            break;
+        case OrdemServico.StatusOrdemServicos.EmPreparacao:
+            retorno = "Em Preparação";
+            break;
+        case OrdemServico.StatusOrdemServicos.EmTransporte:
+            retorno = "Em Transporte";
+            break;
+        case OrdemServico.StatusOrdemServicos.EmTransporteMantenedora:
+            retorno = "Em Transporte para Mantenedora";
+            break;
+        case OrdemServico.StatusOrdemServicos.Entregue:
+            retorno = "Entregue no Cliente";
+            break;
+        case OrdemServico.StatusOrdemServicos.EntregueParaMantenedora:
+            retorno = "Entregue para Mantenedora";
+            break;
+        case OrdemServico.StatusOrdemServicos.Requisitado:
+            retorno = "Requisitado";
+            break;
+    }
+    <text>@retorno</text>
+}
+
+            </div>
+        </div>
+    </div>
+</div>

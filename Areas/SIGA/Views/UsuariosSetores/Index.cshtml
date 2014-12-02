@@ -1,0 +1,46 @@
+﻿@using SIGA.Web.Helpers
+@model IEnumerable<SIGA.Entities.Models.UsuarioSetor>
+
+@{
+    Layout = null;
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Setores</strong>
+    </div>
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Setor.NomeSetor)
+            </th>
+            <th>
+                @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-plus'></span> Novo", "Add", "Create", "UsuariosSetores", routeValues: new { IdUsuario = ViewBag.IdUsuario, IdCliente = ViewBag.IdCliente }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-primary pull-right" })
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Setor.NomeSetor)
+                </td>
+                <td>
+                    <div class="pull-right">
+                        @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-pencil'></span>", "Edit", "Edit", "UsuariosSetores", routeValues: new { id = item.IdUsuarioSetor }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-default" })
+                        &nbsp;
+                        @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-trash'></span>", "Delete", "Delete", "UsuariosSetores", routeValues: new { id = item.IdUsuarioSetor }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-danger" })
+
+                    </div>
+
+                </td>
+            </tr>
+        }
+
+    </table>
+
+</div>
+
+@Scripts.Render("~/bundles/modalform")
+
+

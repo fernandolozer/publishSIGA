@@ -1,0 +1,87 @@
+﻿@model SIGA.Entities.Models.EstruturaFisica
+
+@{
+    ViewBag.Title = "Estrutura Física";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h3>Tem certeza que deseja excluir este registro?</h3>
+<div>
+    <h4>Estrutura Física</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Galpao.NomeGalpao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Galpao.NomeGalpao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IdChildren)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IdChildren)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TipoEstrutura)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TipoEstrutura)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NomeEstrutura)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NomeEstrutura)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.QuantidadeMaximaCaixas)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.QuantidadeMaximaCaixas)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NotaEstrutura)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NotaEstrutura)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CodeDeBarrasEstrutura)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CodeDeBarrasEstrutura)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ObservacaoEstrutura)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ObservacaoEstrutura)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Excluir" class="btn btn-default" /> |
+            @Html.ActionLink("Voltar", "Index")
+        </div>
+    }
+</div>

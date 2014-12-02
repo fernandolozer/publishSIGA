@@ -1,0 +1,52 @@
+﻿@using GridMvc.Html
+@model IEnumerable<SIGA.Entities.Models.OrdemServico>
+
+@{
+    ViewBag.Title = "Ordem de Serviço";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="">
+    <p class="widget-title">
+        <a class="btn btn-primary btn-sm" href="@Url.Action("Create")">
+            Criar Novo
+            <i class="ace-icon fa fa-file-o icon-on-right bigger-110">
+            </i>
+        </a>
+    </p>
+</div>
+
+
+<div class="widget-box">
+    <div class="widget-header">
+        <h5 class="widget-title bigger lighter">
+            <i class="ace-icon fa fa-table"></i>
+            Ordem de Serviço
+        </h5>
+    </div>
+
+    <div class="widget-body">
+        <div class="widget-main no-padding">
+            <div>
+                @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
+                    {
+                        g.Add(n => n.NomeOrdemServico).Titled("Nome");
+                        g.Add(n => n.StatusOrdemServico).Titled("Status");
+                        g.Add(n => n.DataPedidoOrdemServico).Titled("Data Pedido").Format("{0:dd-MM-yyyy}");
+                        g.Add(n => n.TipoOrdemServico).Titled("Tipo");
+                        g.Add()
+                            .Css("action-buttons")
+                            .SetWidth(100)
+                            .Titled("Ação")
+                            .Encoded(false)
+                            .Sanitized(false)
+                            .RenderValueAs(p =>
+                                @Html.ActionLink(" ", "Details", new { id = p.IdOrdemServico }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Edit", new { id = p.IdOrdemServico }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Delete", new { id = p.IdOrdemServico }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString());
+
+                    }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+            </div>
+        </div>
+    </div>
+</div>

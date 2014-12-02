@@ -1,0 +1,74 @@
+﻿@using GridMvc.Html
+@using SIGA.Entities.Models
+@model IEnumerable<SIGA.Entities.Models.ClienteTipoDocumento>
+
+@{
+    ViewBag.Title = "Temporalidade";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="">
+    <p class="widget-title">
+        <a class="btn btn-primary btn-sm" href="@Url.Action("Create")">
+            Criar Novo
+            <i class="ace-icon fa fa-file-o icon-on-right bigger-110">
+            </i>
+        </a>
+    </p>
+</div>
+@using (Html.BeginForm())
+{
+    <div class="widget-box">
+        <div class="widget-header">
+            <h4 class="widget-title">Pesquisar Temporalidade</h4>
+        </div>
+        <div class="widget-body">
+            <div class="widget-main">
+                <form class="form-inline">
+                    <div class="col-xs-6 col-sm-4">
+                        @Html.DropDownList("IdCliente", null, "[ Cliente ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento" })
+                    </div>
+                    <input type="submit" value="Pesquisar" class="btn btn-info btn-sm" />
+                </form>
+            </div>
+            @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
+                    {
+                        g.Add(n => n.Setor.Cliente.Mantenedora.NomeMantenedora).Titled("Mantenedora");
+                        g.Add(n => n.Setor.Cliente.NomeCliente).Titled("Cliente");
+                        g.Add(n => n.Setor.NomeSetor).Titled("Setor");
+                        g.Add(n => n.TipoDocumento.NomeTipoDocumento).Titled("Tipo Documento");
+                        g.Add(n => n.DestinacaoFinal).Titled("Descritores").RenderValueAs(u => RetornaDescritores(u));
+                        g.Add()
+                            .Css("action-buttons")
+                            .SetWidth(100)
+                            .Titled("Ação")
+                            .Encoded(false)
+                            .Sanitized(false)
+                            .RenderValueAs(p =>
+                                @Html.ActionLink(" ", "Details", new { id = p.IdClienteTipoDocumento }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Edit", new { id = p.IdClienteTipoDocumento }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Delete", new { id = p.IdClienteTipoDocumento }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString());
+                    }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+
+            @helper RetornaDescritores(ClienteTipoDocumento cliente)
+{
+    string retorno = string.Empty;
+
+    if (cliente.ClienteTipoDocumentoDescritor != null && cliente.ClienteTipoDocumentoDescritor.Count > 0)
+    {
+        foreach (var descritor in cliente.ClienteTipoDocumentoDescritor)
+        {
+            retorno = retorno + descritor.Descritor.NomeDescritor + ", ";
+        }
+    }
+    if (retorno != string.Empty)
+    {
+        retorno = retorno.Remove(retorno.Length - 2);
+    }
+
+
+        <text>@retorno</text>
+}
+        </div>
+    </div>
+}

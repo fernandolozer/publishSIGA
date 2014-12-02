@@ -1,0 +1,57 @@
+﻿@model SIGA.Entities.Models.ItemOrdemServico
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Item Ordem de Serviço</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Documento.DescricaoDocumento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Documento.DescricaoDocumento)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.OrdemServico.AtendenteUserId)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.OrdemServico.AtendenteUserId)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataDevolucao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataDevolucao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EntregaraNaProximaOS)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EntregaraNaProximaOS)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ObservacaoEntrega)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ObservacaoEntrega)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdItemOrdemServico }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

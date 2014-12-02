@@ -1,0 +1,146 @@
+﻿@model SIGA.Entities.Models.Documento
+
+@{
+    ViewBag.Title = "Documento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    var urlTipoDoc = Url.Content("~/SIGA/Documentos/CarregaListaTiposDocumentosSetor");
+}
+
+<script src="~/Content/js/documentos.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    $(function () {
+
+        function keypressHandler(e) {
+            if (e.which == 13) {
+                $(this).blur();
+                $('#SubmitButton').focus().click();//give your submit an ID
+            }
+        }
+
+        $('#myForm').keypress(keypressHandler);
+
+        //Ajax para carregar os setores do cliente
+        $("#idClienteTipoDocumento").change(function () {
+
+            var elements = "";
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Selecione ]</option>';
+                $('#idSetorTipoDocumento').empty().attr('disabled', true).append(elements);
+                $('#idTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@url',
+                type: 'POST',
+                data: { idCliente: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Selecione ]</option>';
+                    $.each(data, function () {
+                        elements = elements + '<option value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                    });
+                    $('#idSetorTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });
+
+        //Ajax para carregar os tipos documentos dos setores
+        $("#idSetorTipoDocumento").change(function () {
+            var elements = "";
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Selecione ]</option>';
+                $('#idTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@urlTipoDoc',
+                type: 'POST',
+                data: { idSetor: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Selecione ]</option>';
+                    $.each(data, function () {
+                        elements = elements + '<option value="' + this.IdTipoDocumento + '">' + this.NomeTipoDocumento + '</option>';
+                    });
+                    $('#idTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });       
+    });
+</script>
+
+@using (Html.BeginForm("Create", "Documentos", FormMethod.Post, new { name = "frm", id = "frm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Documento</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+        <div class="row">
+            <div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.IdCliente, "Cliente", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("IdCliente", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento" })
+                @Html.ValidationMessageFor(model => model.IdCliente, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.IdSetor, "Setor", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("IdSetor", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idSetorTipoDocumento", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.IdSetor, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.IdClienteTipoDocumento, "Tipo de Documento", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("IdClienteTipoDocumento", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idTipoDocumento", @disabled = "disabled" })
+                @Html.ValidationMessageFor(model => model.IdClienteTipoDocumento, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        @Html.Partial("PartialDestinoDocumento", Model)
+
+        <div class="row">
+            @*<div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.DescricaoDocumento, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.DescricaoDocumento, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.DescricaoDocumento, "", new { @class = "text-danger" })
+            </div>*@
+            <div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.DataDoDocumento, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.DataDoDocumento, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.DataDoDocumento, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                
+                
+
+            </div>
+        </div>
+
+        <div class="row">
+            <span class="right">&nbsp;</span>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-6 col-sm-12" id="replacetarget">
+                @{ Html.RenderAction("Index", "CamposDocumentos", new { id = 0 }); }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-xs-6 col-sm-12">
+                <input type="submit" value="Inserir Descritores" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    <a class="btn btn-xs" href="@Url.Action("Index")"> Voltar</a>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

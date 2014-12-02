@@ -1,0 +1,41 @@
+﻿@model SIGA.Entities.Models.Galpao
+
+@{
+    ViewBag.Title = "Galpão";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Galpão</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.NomeGalpao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NomeGalpao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ContatoGalpao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ContatoGalpao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EmailGalpao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EmailGalpao)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdGalpao }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

@@ -1,0 +1,48 @@
+﻿@model SIGA.Entities.Models.CampoDocumento
+
+@{
+    Layout = null;
+}
+
+<h2>Delete</h2>
+
+<h3>Tem certeza que deseja excluir este registro?</h3>
+<div>
+    <h4>CampoDocumento</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Descritor.NomeDescritor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Descritor.NomeDescritor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Documento.DescricaoDocumento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Documento.DescricaoDocumento)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ValorCampo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ValorCampo)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Excluir" class="btn btn-default" /> |
+            @Html.ActionLink("Voltar", "Index")
+        </div>
+    }
+</div>

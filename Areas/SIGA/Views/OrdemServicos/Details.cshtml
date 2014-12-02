@@ -1,0 +1,64 @@
+﻿@model SIGA.Entities.Models.OrdemServico
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Ordem de Serviço</h4>
+    <hr />
+    <dl class="dl-horizontal">
+       
+        <dt>
+            @Html.DisplayNameFor(model => model.NomeOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NomeOrdemServico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IdOrdemServicoPai)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IdOrdemServicoPai)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusOrdemServico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataPedidoOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataPedidoOrdemServico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataEntregaOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataEntregaOrdemServico)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TipoOrdemServico)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TipoOrdemServico)
+        </dd>
+
+    </dl>
+</div>
+
+

@@ -1,0 +1,49 @@
+﻿@model SIGA.Entities.Models.Fatura
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Fatura</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Contrato.IdContrato)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Contrato.IdContrato)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PeriodoInicial)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PeriodoInicial)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PeriodoFinal)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PeriodoFinal)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsPago)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsPago)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdFatura }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

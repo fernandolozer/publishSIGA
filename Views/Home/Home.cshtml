@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "Home";
+    ViewBag.Message = "Uma visão geral";
+
+}
+<div class="page-header">
+    <h2>@ViewBag.Title</h2>
+    <h4 class="cabecalho">@ViewBag.Message</h4>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h4>O que acontece?</h4>
+        <ul class="nav nav-tabs" style="margin-bottom: 15px;">
+            <li class="active"><a href="#empresa" data-toggle="tab">Depositos</a></li>
+            <li class=""><a href="#externo" data-toggle="tab">Externo</a></li>
+            <li class=""><a href="#clientes" data-toggle="tab">Clientes</a></li>
+
+        </ul>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="empresa">
+                <p>Pro-Memoria</p> 
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" style="width: 20%"></div>
+                </div>
+
+                <p>Sena e Liuth</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" style="width: 40%"></div>
+                </div>
+
+                <p>Externos</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-warning" style="width: 60%"></div>
+                </div>
+
+                <p>Arquivo Contemporaneo</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-danger" style="width: 80%"></div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="externo">
+                <p>Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid. Exercitation +1 labore velit, blog sartorial PBR leggings next level wes anderson artisan four loko farm-to-table craft beer twee. Qui photo booth letterpress, commodo enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum PBR. Homo nostrud organic, assumenda labore aesthetic magna delectus mollit.</p>
+            </div>
+            <div class="tab-pane fade" id="clientes">
+                <p>Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's organic lomo retro fanny pack lo-fi farm-to-table readymade. Messenger bag gentrify pitchfork tattooed craft beer, iphone skateboard locavore carles etsy salvia banksy hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify squid 8-bit cred pitchfork.</p>
+            </div>
+
+        </div>
+    </div>
+    <div class="col-md-4">
+        <h4>Alguns Contadores</h4>
+        <div class="list-group">
+            <a href="#" class="list-group-item">
+                <span class="badge">23</span>
+                OS Entregues hoje
+            </a>
+            <a href="#" class="list-group-item">
+                <span class="badge">3</span>
+                OS em Aberto
+            </a>
+            <a href="#" class="list-group-item">
+                <span class="badge">1</span>
+                OS Entregues em atraso
+            </a>
+            <a href="#" class="list-group-item">
+                <span class="badge">0</span>
+                Reclamações Recebidas
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <h4>Lembretes</h4>
+        <div class="list-group">
+            <a href="#" class="list-group-item">
+                Fatura do Cliente Phidelis Vence Amanha
+            </a>
+            <a href="#" class="list-group-item">
+                Você pode realocarCaixas
+            </a>
+            <a href="#" class="list-group-item">
+                lorem ipsuyn it ldolot
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+﻿@model SIGA.Entities.Models.DocumentoDigital
+
+@{
+    ViewBag.Title = "Documento Digital";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Documento Digital</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Documento.DescricaoDocumento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Documento.DescricaoDocumento)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Arquivo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Arquivo)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataCriacao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataCriacao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Descricao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Descricao)
+        </dd>
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdDocumentoDigital }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

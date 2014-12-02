@@ -1,0 +1,73 @@
+﻿@model SIGA.Entities.Models.Atividade
+
+@{
+    ViewBag.Title = "Atividade";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Atividade</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.DestinatarioUser.Nome)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DestinatarioUser.Nome)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SolicitanteUser.Nome)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SolicitanteUser.Nome)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TituloAtividade)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TituloAtividade)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DescricaoAtividade)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DescricaoAtividade)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataCriacao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataCriacao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataConclusao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataConclusao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.StatusAtividade)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.StatusAtividade)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdAtividade }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

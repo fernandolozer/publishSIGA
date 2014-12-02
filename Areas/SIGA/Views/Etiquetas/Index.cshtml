@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript">
+    $(function () {
+
+        $("#txtTipoEtiqueta").keyup(function () {
+            var url = window.location.pathname + "/ImprimirFolhaPersonalizada?modelo=1&quantidade=" + $("#txtTipoEtiqueta").val();
+            $('#btnGerarPersonalizadas').attr("href", url);
+        });
+    });
+
+</script>
+
+
+<div class="row">
+    <div class="col-sm-5">
+        <div class="widget-box">
+            <div class="widget-header">
+                <h4 class="widget-title">Folha de Etiquetas</h4>
+            </div>
+
+            <div class="widget-body">
+                <div class="widget-main no-padding">
+                    <form>
+                        <!-- <legend>Form</legend> -->
+                        <fieldset>
+                            <label>Folha de Etiquetas Padrão</label>
+                            <span class="help-block">Será gerado um arquivo de etiquetas aleatórias e feito download automaticamente. Para imprimir, basta abrir o arquivo e imprirmir.</span>
+
+                        </fieldset>
+                        <div class="form-actions center">
+                            <a href="@Url.Action("ImprimirFolha")" class=" btn btn-sm btn-success">
+                                Gerar
+                                <i class="ace-icon fa fa-print icon-on-right bigger-110"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-5">
+        <div class="widget-box">
+            <div class="widget-header">
+                <h4 class="widget-title">Folha de Etiquetas Personalizadas</h4>
+            </div>
+
+            <div class="widget-body">
+                <div class="widget-main no-padding">
+                    <form>
+                        <!-- <legend>Form</legend> -->
+                        <fieldset>
+                            <label>Folha de Etiquetas Personalizada</label>
+                            <span class="help-block">
+                                <select id="ckbTipoEtiqueta">
+                                    <option value="0">[ Selecione um padrão ]</option>
+                                    <option value="1">2 etiquetas de 4 cm</option>
+                                    @*<option value="2">3 etiquetas de 5 cm</option>*@
+                                </select>
+                                <br />
+                                Quantidade de linhas:
+                                <input id="txtTipoEtiqueta" type="number" class="qtd" />
+                            </span>
+                        </fieldset>
+                        <div class="form-actions center">
+                            
+                            <a href="" id="btnGerarPersonalizadas" class=" btn btn-sm btn-success">
+                                Gerar
+                                <i class="ace-icon fa fa-print icon-on-right bigger-110"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

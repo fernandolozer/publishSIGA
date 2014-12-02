@@ -1,0 +1,42 @@
+﻿@model SIGA.Entities.Models.CampoDocumento
+
+@{
+    Layout = null;
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>CampoDocumento</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Descritor.NomeDescritor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Descritor.NomeDescritor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Documento.DescricaoDocumento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Documento.DescricaoDocumento)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ValorCampo)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ValorCampo)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdCampoDocumento }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

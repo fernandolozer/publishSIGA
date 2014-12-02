@@ -1,0 +1,50 @@
+﻿@using SIGA.Web.Helpers
+@model IEnumerable<SIGA.Entities.Models.ClienteTipoDocumentoDescritor>
+
+@{
+    Layout = null;
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Descritores</strong>
+    </div>
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Descritor.NomeDescritor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ordem)
+            </th>
+            <th>
+                @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-plus'></span> Novo", "Add", "Create", "ClienteTipoDocumentoDescritores", routeValues: new { IdClienteTipoDocumento = ViewBag.IdClienteTipoDocumento }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-primary pull-right" })
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Descritor.NomeDescritor)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Ordem)
+                </td>
+                <td>
+                    <div class="pull-right">
+                        @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-pencil'></span>", "Edit", "Edit", "ClienteTipoDocumentoDescritores", routeValues: new { id = item.IdClienteTipoDocumentoDescritor }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-default" })
+                        &nbsp;
+                        @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-trash'></span>", "Delete", "Delete", "ClienteTipoDocumentoDescritores", routeValues: new { id = item.IdClienteTipoDocumentoDescritor }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-danger" })
+
+                    </div>
+
+                </td>
+            </tr>
+        }
+
+    </table>
+
+</div>
+
+@Scripts.Render("~/bundles/modalform")

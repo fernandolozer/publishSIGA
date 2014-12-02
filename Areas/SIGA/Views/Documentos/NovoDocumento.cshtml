@@ -1,0 +1,852 @@
+﻿@using SIGA.Web.Areas.SIGA.Models;
+@model SIGA.Web.Areas.SIGA.Models.DocumentoModel
+@{
+    ViewBag.Title = "Documento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    var urlTipoDoc = Url.Content("~/SIGA/Documentos/CarregaListaTiposDocumentosSetor");
+    var urlDescritores = Url.Content("~/SIGA/Documentos/CarregaDescritores");
+    var urlInserirDocumento = Url.Content("~/SIGA/Documentos/IncluirDocumento");
+    var urlDocumentosDoMesmoLote = Url.Content("~/SIGA/Documentos/DocumentosDoMesmoLote");
+    var urlNovoLote = Url.Content("~/SIGA/Documentos/NovoLote");
+    var urlNovaCaixa = Url.Content("~/SIGA/Documentos/NovaCaixa");
+    var urlInformacoesDocumento = Url.Content("~/SIGA/Documentos/InformacoesDocumento");
+    var urlExcluirDocumento = Url.Content("~/SIGA/Documentos/ExcluirDocumento");
+
+    var urlCaixaAuto = Url.Content("~/SIGA/Documentos/GetProximaCaixaDoCliente");
+    var urlCaixaInteligente = Url.Content("~/SIGA/Documentos/GetPossiveisCaixasCliente");
+    var urlCaixaManual = Url.Content("~/SIGA/Documentos/GetInfoCaixa");
+    var urlValidarItensTela = Url.Content("~/SIGA/Documentos/ValidacaoItensTela");
+    var urlSalvarCodigoBarras = Url.Content("~/SIGA/Documentos/SalvarCodigoDeBarras");
+    var urlObtemCodigoBarras = Url.Content("~/SIGA/Documentos/ObtemCodigoBarras");
+    var idCliente = ViewData["IdCliente"];
+    var idsetor = ViewData["IdSetor"];
+    var idTemporalidade = ViewData["IdTemporalidade"];
+    var modoDestino = ViewData["ModoDestino"];
+
+}
+
+<script src="~/Content/js/documentos.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+    $(function () {
+        //Ajax para carregar os setores do cliente
+        $("#IdClienteTipoDocumento").change(function () {
+            EsconderMensagemErro();
+            VerificaSeExisteErros();
+            var elements = "";
+            var setorId = '@idsetor';
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Selecione ]</option>';
+                $('#idSetorTipoDocumento').empty().attr('disabled', true).append(elements);
+                $('#idTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@url',
+                type: 'POST',
+                data: { idCliente: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Selecione ]</option>';
+                    $.each(data, function () {
+                        if (setorId == 0) {
+                            elements = elements + '<option value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                        }
+                        else {
+                            elements = elements + '<option selected value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                        }
+
+                    });
+                    $('#idSetorTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });
+
+        //Ajax para carregar os tipos documentos dos setores
+        $("#idSetorTipoDocumento").change(function () {
+            EsconderMensagemErro();
+            VerificaSeExisteErros();
+            var elements = "";
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Selecione ]</option>';
+                $('#idTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@urlTipoDoc',
+                type: 'POST',
+                data: { idSetor: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Selecione ]</option>';
+                    $.each(data, function () {
+                        elements = elements + '<option value="' + this.IdTipoDocumento + '">' + this.NomeTipoDocumento + '</option>';
+                    });
+                    $('#idTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });
+
+
+        // ao mudar o tipo de documento, tem que criar os descritores.
+        $("#idTipoDocumento").change(function () {
+            var tabela = "";
+            EsconderMensagemErro();
+
+            if ($(this).val() == '') {
+                $('#divDescritores').html('');
+                return;
+            }
+            $.ajax({
+                url: '@urlDescritores',
+                type: 'GET',
+                data: { IdTipoDocumento: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    MontarListaDescritores(data);
+                }
+            });
+        });
+
+        //$("input").keypress(function (event) {
+        //    if (event.which == 13) {
+        //        event.preventDefault();
+        //        SalvaDocumento();
+        //    }
+        //});
+
+        $("#divDescritores").on("keyup", "input", function () {
+            event.preventDefault();
+            return;
+        })
+
+
+        $("#divDescritores").on("keypress", "input", function () {
+            if (event.which == 13) {
+                event.preventDefault();
+                SalvaDocumento();
+            }
+        });
+
+
+        function MontarListaDescritores(data) {
+            $('#divDescritores').html('');
+            var classPrimeiro = 'primeiroDescritor';
+            tabela = '<div class="panel panel-default"><div class="panel-heading"><strong>Campos do Documento</strong></div><table class="table"><tbody><tr><th>Nome do Descritor</th><th>Valor</th></tr>';
+            $.each(data, function () {
+                tabela = tabela + '<tr><td class="col-xs-6 col-sm-4">'
+                tabela = tabela + ' <input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="' + this.NomeDescritor + '">';
+                tabela = tabela + '</td><td>';
+                var valor = ''
+                if (this.ValorDescritor != null) {
+                    valor = this.ValorDescritor;
+                }
+                var classTipoDescritor = '';
+                if (this.TipoDescritor == 4) {
+                    classTipoDescritor = ' onkeypress="javascript: mascara(this, cnpj_mask);" maxlength="18" ';
+                }
+                if (this.TipoDescritor == 5) {
+                    classTipoDescritor = ' onkeypress="javascript: mascara(this, cpf_mask);" maxlength="14" ';
+                }
+                var strTamanhoMaximo = '';
+                if (this.TamanhoMaximo > 0) {
+                    strTamanhoMaximo = ' maxlength="' + this.TamanhoMaximo + '" ';
+                }
+                console.log(this.TamanhoMaximo);
+                tabela = tabela + '<input class="' + classPrimeiro +
+                    ' form-control text-box single-line descritor" data-val="true" id="' + this.idDescritor +
+                    '" name="' + this.idDescritor + '" type="text" value="' + this.ValorDescritor + '" ' + classTipoDescritor + strTamanhoMaximo + ' >';
+                tabela = tabela + ' </td></tr>';
+                classPrimeiro = '';
+            });
+
+            tabela = tabela + '</tbody></table></div>';
+            $(tabela).appendTo('#divDescritores');
+        };
+
+        $("#btnSalvarContinuar").click(function () {
+            SalvaDocumento();
+        });
+
+        $("#btnNovoLote").click(function () {
+            CriaNovoLote();
+        });
+
+        $("#btnNovaCaixa").click(function () {
+            CriaNovaCaixa();
+        });
+
+
+        function CriaNovaCaixa() {
+            EsconderMensagemErro();
+            var varidCliente = $("#IdClienteTipoDocumento").val();
+            $.ajax({
+                url: '@urlNovaCaixa',
+                type: 'POST',
+                data: {
+                    idCliente: varidCliente
+                },
+                datatype: 'json',
+                success: function (data) {
+                    if (data.ExisteErro == true) {
+                        ExibirMensagemErro("Ocorreu um erro ao Criar a caixa.", data.Mensagem);
+                        return;
+                    }
+                    $("#selectModoCaixa").val("3");
+                    $("#selectModoCaixa").change();
+                    $("#txtCaixaInfoManual").val(data.Dados.NumeroCaixa);
+                    $('#selLote').empty();
+                    $('#selLote').append($('<option />', { value: "0", text: "[ Selecione ]" }));
+                    $.each(data.Dados.ListaLotes, function () {
+                        $('#selLote').append($('<option />', { value: this.IdLote, text: this.NomeLote, selected: this.Selected }));
+                    });
+                    $('#selLote').change();
+                },
+                error: function () {
+                    ExibirMensagemErro("Erro ao Criar a caixa.", "Erro ao Criar Caixa. Preencher Corretamente o cliente e o numero da caixa.");
+                }
+            });
+        }
+
+        function CriaNovoLote() {
+            EsconderMensagemErro();
+            var varidCliente = $("#IdClienteTipoDocumento").val();
+            var varNumeroCaixa = 0;
+            if ($("#selectModoCaixa").val() == 3) {
+                varNumeroCaixa = $("#txtCaixaInfoManual").val();
+            }
+            if ($("#selectModoCaixa").val() == 2) {
+                varNumeroCaixa = $("#selCaixaInt").val();
+            }
+            var loteSelecionado = "";
+            $.ajax({
+                url: '@urlNovoLote',
+                type: 'POST',
+                data: {
+                    idCliente: varidCliente, NumeroCaixa: varNumeroCaixa
+                },
+                datatype: 'json',
+                success: function (data) {
+                    if (data.ExisteErro == true) {
+                        ExibirMensagemErro("Erro ao Criar o Lote", data.Mensagem);
+                        return;
+                    }
+                    //$("#selectModoCaixa").val("3");
+                    //$("#selectModoCaixa").change();
+                    //$("#txtCaixaInfoManual").val(data.Dados.NumeroCaixa);
+                    $('#selLote').empty();
+                    $('#selLote').append($('<option />', { value: "0", text: "[ Selecione ]" }));
+                    $.each(data.Dados.ListaLotes, function () {
+                        if (this.Selected == true) {
+                            loteSelecionado = this.IdLote;
+                        }
+                        $('#selLote').append($('<option />', { value: this.idLote, text: this.NomeLote, selected: this.Selected }));
+                    });
+                    $('#selLote').change();
+                },
+                error: function () {
+                    ExibirMensagemErro("Erro ao Criar a Caixa.", "Erro ao Criar Caixa. Preencher Corretamente o cliente e o numero da caixa.");
+                }
+            });
+        }
+        function EditarDocumento(idDocumento) {
+            EsconderMensagemErro();
+            $.ajax({
+                url: '@urlInformacoesDocumento',
+                type: 'POST',
+                data: {
+                    idDocumento: idDocumento
+                },
+                datatype: 'json',
+                success: function (data) {
+                    MontarListaDescritores(data.Descritores);
+                    $("#idTipoDocumento").val(data.IdTipoDocumento);
+                    $("#txtDataDocumento").val(data.DataDocumento);
+                    $("#idDocumentoEmEdicao").val(data.IdDocumento);
+                },
+                error: function () {
+                    ExibirMensagemErro("Preencha corretamente os descritores obrigatórios.", "Erro. Favor Preencher corretamente todos os campos.<br/> Verifique se os descritores Obrigatórios estão preenchidos.");
+                }
+            });
+        };
+
+        function ExcluirDocumento(idDocumento) {
+            var varidLote = $("#selLote").val();
+            EsconderMensagemErro();
+            $.ajax({
+                url: '@urlExcluirDocumento',
+                type: 'POST',
+                data: {
+                    idDocumento: idDocumento, idLote: varidLote
+                },
+                datatype: 'json',
+                success: function (data) {
+                    // montar a lista de todos documentos no mesmo lote.
+                    PreencheDocumentosDoLote(data);
+                    // limpar os campos de texto.
+                    for (var i = 0; i < listaImputs.length; i++) {
+                        listaImputs[i].value = '';
+                    }
+                    $("#idDocumentoEmEdicao").val('');
+                    $("#divDescritores").find("input.primeiroDescritor").focus();
+                },
+                error: function () {
+                    ExibirMensagemErro("Erro.", "Erro ao excluir.");
+                }
+            });
+        };
+
+        $("#divDocumentosLote").on("click", "input.btnEditar", function () {
+            EsconderMensagemErro();
+            var idDocumento = this.getAttribute('data-iddocumento');
+            EditarDocumento(idDocumento);
+        });
+
+        $("#divDocumentosLote").on("click", "input.btnExcluir", function () {
+            EsconderMensagemErro();
+            var r = confirm("Tem certeza que deseja exluir este documento? \nEsta operação não poderá ser desfeita.");
+            if (r == true) {
+                var idDocumento = this.getAttribute('data-iddocumento');
+                ExcluirDocumento(idDocumento);
+            }
+            else {
+            }
+
+        });
+
+        function PreencheDocumentosDoLote(dados) {
+            $('#divDocumentosLote').html('');
+            var tabela = "";
+            tabela = ' <table class="table"><tbody><tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width: 80px">Ações</th></tr>';
+            $.each(dados, function () {
+                tabela = tabela + '<tr>';
+                tabela = tabela + '<td>' + this.SequencialDocumentoLote + '</td>';
+                tabela = tabela + '<td>' + this.DescricaoDocumento + '</td>';
+                tabela = tabela + '<td>' + this.DescricaoTipoDocumento + '</td>'
+                tabela = tabela + '<td style="white-space: nowrap;"><input class="btnEditar" type="button" value="Editar"  data-iddocumento="' + this.IdDocumento + '" </input> &nbsp; <input class="btnExcluir" type="button" value="Excluir"  data-iddocumento="' + this.IdDocumento + '" </input></td>';
+                tabela = tabela + '</tr>'
+
+            });
+            tabela = tabela + ' </tbody></table>';
+            $(tabela).appendTo('#divDocumentosLote');
+        }
+
+        function VerificaSeExisteErros() {
+            EsconderMensagemErro();
+            var varidCliente = $("#IdClienteTipoDocumento").val();
+            $.ajax({
+                url: '@urlValidarItensTela',
+                type: 'POST',
+                data: {
+                    idCliente: varidCliente
+                },
+                datatype: 'json',
+                success: function (data) {
+                    if (data.ExisteErro == true) {
+                        ExibirMensagemErro("Alguns avisos requerem a sua atenção.", data.Mensagem);
+                        return;
+                    }
+                },
+                error: function () {
+                    console.log('Deu erro ao gerar as mensagens de erro. ');
+                }
+            });
+        }
+
+        // para inserir documentos
+        function SalvaDocumento() {
+            EsconderMensagemErro();
+            var varidCliente = $("#IdClienteTipoDocumento").val();
+            var varIdDocumento = $("#idDocumentoEmEdicao").val();
+            if (varIdDocumento == null || varIdDocumento == '') {
+                varIdDocumento = 0;
+            }
+            var varidSetor = $("#idSetorTipoDocumento").val();
+            var varidTipoDocumento = $("#idTipoDocumento").val();
+            var varidLote = $("#selLote").val();
+            var vardataDocumento = $("#txtDataDocumento").val();
+            var dictionary = {};
+            var listaImputs = document.getElementsByClassName('descritor');
+            for (var i = 0; i < listaImputs.length; i++) {
+                dictionary[listaImputs[i].id] = listaImputs[i].value;
+            }
+            $.ajax({
+                url: '@urlInserirDocumento',
+                type: 'POST',
+                data: {
+                    idDocumento: varIdDocumento, idLote: varidLote, idCliente: varidCliente, idSetor: varidSetor,
+                    dataDoDocumento: vardataDocumento, idClienteTipoDocumento: varidTipoDocumento,
+                    descritores: dictionary
+                },
+                datatype: 'json',
+                success: function (data) {
+                    // montar a lista de todos documentos no mesmo lote.
+                    PreencheDocumentosDoLote(data);
+                    // limpar os campos de texto.
+                    for (var i = 0; i < listaImputs.length; i++) {
+                        listaImputs[i].value = '';
+                    }
+                    $("#idDocumentoEmEdicao").val('');
+                    $("#divDescritores").find("input.primeiroDescritor").focus();
+                },
+                error: function () {
+                    ExibirMensagemErro("Erro no preenchimento dos campos", 'Favor Preencher corretamente todos os campos. <br/>  - Verifique se os descritores Obrigatórios estão preenchidos.<br/>  - Verifique se a Data do Documento não é maior que a data de hoje.');
+                }
+            });
+
+        }
+
+        $("#btnLimpar").click(function () {
+            EsconderMensagemErro();
+            var listaImputs = document.getElementsByClassName('descritor');
+            for (var i = 0; i < listaImputs.length; i++) {
+                listaImputs[i].value = '';
+            }
+            $("#idDocumentoEmEdicao").val('');
+            $(".primeiroDescritor").focus();
+        });
+
+        // Ajax para carregar os modos de destinos de caixas
+
+        $("#selectModoCaixa").change(function () {
+            EsconderMensagemErro();
+            MostrarLotesCaixa(false);
+            IniciaCursor();
+            LimparCodigoBarrasCaixa();
+            if ($(this).val() == '0') {
+                ExibirInfosManual(false);
+                ExibirInfosAuto(false);
+                ExibirInfosInt(false);
+                MostrarLotesCaixa(false);
+            }
+            if ($(this).val() == '1') { // Auto
+                ExibirInfosInt(false);
+                ExibirInfosManual(false);
+                ExibirInfosAuto(true);
+                var textoCaixa = "";
+                $.ajax({
+                    url: '@urlCaixaAuto',
+                    type: 'POST',
+                    data: { idCliente: $('#IdClienteTipoDocumento').val() },
+                    datatype: 'json',
+                    success: function (data) {
+                        textoCaixa = data.Descricao;
+                        $('#txtCaixaAuto').empty().val(textoCaixa);
+                    },
+                    error: function () {
+                        alert("Falha ao Obter Caixa Automatica");
+                    }
+                });
+
+
+            }
+            if ($(this).val() == '2') { // Intelligente
+
+                ExibirInfosAuto(false);
+                ExibirInfosManual(false);
+                ExibirInfosInt(true);
+
+                var elements = "";
+                $.ajax({
+                    url: '@urlCaixaInteligente',
+                    type: 'POST',
+                    data: { idCliente: $('#IdClienteTipoDocumento').val() },
+                    datatype: 'json',
+                    success: function (data) {
+                        elements = '<option value="">[ Selecione ]</option>';
+                        $.each(data, function () {
+                            elements = elements + '<option value="' + this.idCaixa + '">' + this.Descricao + '</option>';
+                        });
+                        $('#selCaixaInt').empty().attr('disabled', false).append(elements);
+                    },
+                    error: function () {
+                        alert("Falha ao Obter Caixa Inteligente");
+                    }
+                });
+
+            }
+
+            if ($(this).val() == '3') { // Informar Manualmente
+                ExibirInfosAuto(false);
+                ExibirInfosInt(false);
+                ExibirInfosManual(true);
+            }
+
+            FimCursor();
+        });
+        // fim ajax modo caixa.
+
+        $('#selCaixaInt').change(function () {
+            EsconderMensagemErro();
+            LimparCodigoBarrasCaixa();
+            $('#lblConfirmacaoCaixa').text('');
+            $.ajax({
+                url: '@urlCaixaManual',
+                type: 'POST',
+                data: { IdCliente: $('#IdClienteTipoDocumento').val(), NumeroCaixa: $('#selCaixaInt').val() },
+                datatype: 'json',
+                success: function (data) {
+                    $('#selLote').empty();
+
+                    if (data == null || data.Count == 0) {
+                        MostrarLotesCaixa(false);
+                        $('#lblConfirmacaoCaixa').text('Caixa não Encontrada');
+                        $('#divMsgErro').show('fast');
+                    }
+                    $('#divMsgErro').hide('fast');
+                    MostrarLotesCaixa(true);
+                    $('#selLote').append($('<option />', { value: "0", text: "[ Selecione ]" }));
+                    $.each(data, function (key, textValue) {
+                        $('#selLote').append($('<option />', { value: key, text: textValue }));
+                    });
+                },
+                error: function (x, textStatus, errorThrown) {
+
+                    MostrarLotesCaixa(false);
+                    ExibirMensagemErro("Erro ao obter os lotes da caixa", errorThrown);
+
+                }
+            });
+            BuscarCodigoBarrasCaixa();
+        });
+
+        $('#txtCaixaInfoManual').focusout(function () {
+            EsconderMensagemErro();
+            LimparCodigoBarrasCaixa();
+            $('#lblConfirmacaoCaixa').text('');
+            $.ajax({
+                url: '@urlCaixaManual',
+                type: 'POST',
+                data: { IdCliente: $('#IdClienteTipoDocumento').val(), NumeroCaixa: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    $('#selLote').empty();
+
+                    if (data == null || data.Count == 0) {
+                        MostrarLotesCaixa(false);
+                        $('#lblConfirmacaoCaixa').text('Caixa não Encontrada');
+                        $('#divMsgErro').show('fast');
+                    }
+                    $('#divMsgErro').hide('fast');
+                    MostrarLotesCaixa(true);
+                    $('#selLote').append($('<option />', { value: "0", text: "[ Selecione ]" }));
+                    $.each(data, function (key, textValue) {
+                        $('#selLote').append($('<option />', { value: key, text: textValue }));
+                    });
+                },
+                error: function () {
+                    $('#lblConfirmacaoCaixa').text('Caixa não Encontrada.');
+                    $('#divMsgErro').show('fast');
+                    MostrarLotesCaixa(false);
+                }
+            });
+            BuscarCodigoBarrasCaixa();
+        });
+
+        function BuscarCodigoBarrasCaixa() {
+            // para buscar o codigo de barras
+            LimparCodigoBarrasCaixa();
+            $.ajax({
+                url: '@urlObtemCodigoBarras',
+                type: 'POST',
+                data: { objeto: 'Caixa', idCliente: $('#IdClienteTipoDocumento').val(), idCaixa: ObtemNumeroCaixa(), idLote: 0 },
+                datatype: 'json',
+                success: function (data) {
+                    $('#txtCodigoBarrasCaixa').val(data);
+                    $('#btnBarcodeCaixa').show('fast');
+                },
+                error: function () {
+                    LimparCodigoBarrasCaixa();
+                }
+            });
+        }
+
+        function BuscarCodigoBarrasLote() {
+            // para buscar o codigo de barras
+            LimparCodigoBarrasLote();
+            $.ajax({
+                url: '@urlObtemCodigoBarras',
+                type: 'POST',
+                data: { objeto: 'Lote', idCliente: $('#IdClienteTipoDocumento').val(), idCaixa: ObtemNumeroCaixa(), idLote: ObterNumeroLote() },
+                datatype: 'json',
+                success: function (data) {
+                    $('#txtCodigoBarrasLote').val(data);
+                    $('#btnBarcodeLote').show('fast');
+                },
+                error: function () {
+                    LimparCodigoBarrasLote();
+                }
+            });
+        }
+
+
+        $('#selLote').change(function () {
+            EsconderMensagemErro();
+            LimparCodigoBarrasLote();
+            $.ajax({
+                url: '@urlDocumentosDoMesmoLote',
+                type: 'POST',
+                data: { IdLote: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    PreencheDocumentosDoLote(data);
+                }
+            });
+            BuscarCodigoBarrasLote();
+        });
+
+        // preenche codigo de barras da caixa.
+        $('#btnCodigoBarrasCaixa').click(function () {
+            $('#lblCodigoBarrasCaixa').hide('fast');
+            var idCaixa = ObtemNumeroCaixa();
+            var codigo = $('#txtCodigoBarrasCaixa').val();
+            var varidCliente = $("#IdClienteTipoDocumento").val();
+            $.ajax({
+                url: '@urlSalvarCodigoBarras',
+                type: 'POST',
+                data: { objeto: 'Caixa', idCliente: varidCliente, idCaixa: idCaixa, idLote: 0, codigoBarras: codigo },
+                datatype: 'json',
+                success: function (data) {
+                    $('#lblCodigoBarrasCaixa').show('fast');
+                },
+                error: function (x, textStatus, errorThrown) {
+                    $('#lblCodigoBarrasCaixa').hide('fast');
+                    ExibirMensagemErro("Erro ao salvar o codigo de barras", errorThrown);
+                }
+
+            });
+        });
+
+        // preenche codigo de barras da caixa.
+        $('#btnCodigoBarrasLote').click(function () {
+            $('#lblCodigoBarrasLote').hide('fast');
+            var idCaixa = ObtemNumeroCaixa();
+            var idLote = ObterNumeroLote();
+            var codigo = $('#txtCodigoBarrasLote').val();
+            var varidCliente = $("#IdClienteTipoDocumento").val();
+            $.ajax({
+                url: '@urlSalvarCodigoBarras',
+                type: 'POST',
+                data: { objeto: 'Lote', idCliente: varidCliente, idCaixa: idCaixa, idLote: idLote, codigoBarras: codigo },
+                datatype: 'json',
+                success: function (data) {
+                    $('#lblCodigoBarrasLote').show('fast');
+                },
+                error: function (x, textStatus, errorThrown) {
+                    $('#lblCodigoBarrasLote').hide('fast');
+                    ExibirMensagemErro("Erro ao salvar o codigo de barras", errorThrown);
+                }
+
+            });
+        });
+
+
+
+    });
+</script>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Documento</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <input type="hidden" id="idDocumentoEmEdicao" />
+
+        <div class="row">
+            <div class="col-xs-6 col-sm-4">
+                <label class="control-label">Cliente</label>
+                @Html.DropDownList("IdClienteTipoDocumento", (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new { @class = "form-control" })
+
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                <label class="control-label">Setor</label>
+                <select id="idSetorTipoDocumento" disabled class="form-control"></select>
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                <label class="control-label">Tipo de Documento</label>
+                <select id="idTipoDocumento" disabled class="form-control"></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-sm-4">
+                <label class="control-label">Modo de Destino das Caixas</label>
+                <select id="selectModoCaixa" class="form-control">
+                    <option value="0"> [ Selecione ] </option>
+                    @*<option value="1">Automatico - Busca próxima Caixa</option>*@
+                    <option value="3">Manual - Informar Manualmente</option>
+                    <option value="2">Inteligente - Busca caixas com espaço</option>
+                </select>
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                <div class="col-xs-10 col-sm-10">
+                    <label id="lblCaixaAuto" class="control-label" style="display:none;">Caixa Sugerida</label>
+                    <input id="txtCaixaAuto" type="text" class="form-control" disabled hidden="hidden" style="display:none;" />
+
+                    <label id="lblCaixaInt" class="control-label" style="display:none;">Caixas Candidatas</label>
+                    <select id="selCaixaInt" class="form-control" style="display:none;"></select>
+
+                    <label id="lblCaixaInfoManual" class="control-label" style="display:none;">Informe Caixa</label>
+                    <input id="txtCaixaInfoManual" type="text" class="form-control" hidden="hidden" style="display:none;" />
+                </div>
+                <div class="col-xs-2 col-sm-2 left" style="font-size: 21px; ">
+                    <br />
+                    <a id="btnBarcodeCaixa" tabindex="-1" href="" style="display:none;" data-toggle="modal" data-target="#ModalBarcodeCaixa">
+                        <i class="ace-icon fa fa-barcode bigger-140"></i>
+                    </a>
+                    <div class="modal fade bs-example-modal-lg" id="ModalBarcodeCaixa" tabindex="-1" role="dialog" aria-labelledby="ModalBarcodeCaixa" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Fechar</span></button>
+                                    <h4 class="modal-title">Salve o Codigo de Barras</h4>
+                                </div>
+                                <div>
+                                    <input type="text" id="txtCodigoBarrasCaixa" />
+                                    <input type="button" id="btnCodigoBarrasCaixa" class="btn btn-primary" value="Salvar" />
+                                    <span id="lblCodigoBarrasCaixa" class="control-label" style="display:none"><i class="ace-icon fa fa-check"></i> Salvo com Sucesso.</span>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div> <!-- /.fecha modal -->
+
+                </div>
+
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                <div id="divMsgErro" style="display:none;">
+                    <br />
+                    <label id="lblConfirmacaoCaixa" class="control-label"></label>
+                </div>
+                <div id="divLote" style="display:none;">
+                    <div class="col-xs-10 col-sm-10">
+                        <label id="lblLote" class="control-label">Selecione um Lote</label>
+                        <select id="selLote" class="form-control"></select>
+                    </div>
+                    <div class="col-xs-2 col-sm-2 left" style="font-size: 21px; ">
+                        <br />
+                        <a id="btnBarcodeLote" tabindex="-1" href="" style="display:none;" data-toggle="modal" data-target="#ModalBarcodeLote">
+                            <i class="ace-icon fa fa-barcode bigger-140"></i>
+                        </a>
+                        <div class="modal fade bs-example-modal-lg" id="ModalBarcodeLote" tabindex="-1" role="dialog" aria-labelledby="ModalBarcodeLote" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Fechar</span></button>
+                                        <h4 class="modal-title">Salve o Codigo de Barras</h4>
+                                    </div>
+                                    <div>
+                                        <input type="text" id="txtCodigoBarrasLote" />
+                                        <input type="button" id="btnCodigoBarrasLote" class="btn btn-primary" value="Salvar" />
+                                        <span id="lblCodigoBarrasLote" class="control-label" style="display:none"><i class="ace-icon fa fa-check"></i> Salvo com Sucesso.</span>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                                    </div>
+                                </div><!-- /.modal-content -->
+                            </div><!-- /.modal-dialog -->
+                        </div> <!-- /.fecha modal -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-sm-4">
+                <label class="control-label">Data Documento</label>
+                <input type="date" id="txtDataDocumento" required class="form-control" />
+            </div>
+            <div class="col-xs-12 col-sm-8">
+                <br />
+                <div class="alert alert-warning" id="divWarning" role="alert" style="display:none;">
+                    <div class="row">
+                        <div class="col-lg-8  col-md-8 col-sm-8 text-left">
+                            <span><strong>Atenção.</strong></span> <span id="spanTituloErro">Existem Alguns Erros Nesta Tela.</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4 text-right">
+                            <!-- Button trigger modal -->
+                            <input id="btnDetalhesErro" type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#ModalErro" value="Ver Detalhes" />
+                        </div>
+                    </div>
+                </div>
+                @*Modal*@
+                <div class="modal fade bs-example-modal-lg" id="ModalErro" tabindex="-1" role="dialog" aria-labelledby="ModalErro" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Fechar</span></button>
+                                <h4 class="modal-title">Lista dos Erros</h4>
+                            </div>
+                            <div id="divCorpoErroMessage" class="modal-body">
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div> <!-- /.fecha modal -->
+
+            </div>
+            @*<div class="col-xs-6 col-sm-4">
+
+                </div>*@
+        </div>
+
+        <div class="row">
+            <span class="right">&nbsp;</span>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-6 col-sm-12" id="replacetarget">
+                <div id="divDescritores">
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-xs-6 col-sm-12">
+                <input id="btnSalvarContinuar" type="button" value="Salvar/Continuar" class="btn btn-primary" />
+                <input id="btnNovoLote" type="button" value="Novo Lote" class="btn btn-primary" />
+                <input id="btnNovaCaixa" type="button" value="Nova Caixa" class="btn btn-primary" />
+                <input id="btnLimpar" type="button" value="Limpar Descitores" class="btn btn-primary" />
+                @*<input type="button" value="Fechar Lote" class="btn btn-primary" />
+                    <input type="button" value="Fechar Caixa" class="btn btn-primary" />*@
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-12" id="replacetarget">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Documentos Cadastrados no mesmo lote</strong>
+                </div>
+                <div id="divDocumentosLote">
+
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}
+
+<div>
+    <a class="btn btn-xs" href="@Url.Action("Index")"> Ir Para Pesquisa</a>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

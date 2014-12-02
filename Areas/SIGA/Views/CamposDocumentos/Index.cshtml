@@ -1,0 +1,49 @@
+﻿@using SIGA.Web.Helpers
+@model IEnumerable<SIGA.Entities.Models.CampoDocumento>
+
+@{
+    Layout = null;
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Campos do Documento</strong>
+    </div>
+    <table class="table">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Descritor.NomeDescritor)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ValorCampo)
+            </th>
+            @*<th>
+                    @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-plus'></span> Novo", "Add", "Create", "CamposDocumentos", routeValues: new { IdDocumento = ViewBag.IdDocumento }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-primary pull-right" })
+                </th>*@
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="col-xs-6 col-sm-4">
+                    @*@Html.DisplayFor(modelItem => item.Descritor.NomeDescritor, new { name = "item.NomeCampo" })*@
+                    @Html.EditorFor(modelItem => item.Descritor.NomeDescritor, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @tabindex = "-1" } })
+                </td>
+                <td>
+                    @Html.EditorFor(modelItem => item.ValorCampo, new { htmlAttributes = new { @class = "form-control" } })
+                </td>
+                @*<td>
+                        <div class="pull-right">
+                            @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-pencil'></span>", "Edit", "Edit", "CamposDocumentos", routeValues: new { id = item.IdCampoDocumento }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-default" })
+                        </div>
+
+                    </td>*@
+            </tr>
+        }
+
+    </table>
+
+</div>
+
+@Scripts.Render("~/bundles/modalform")
+

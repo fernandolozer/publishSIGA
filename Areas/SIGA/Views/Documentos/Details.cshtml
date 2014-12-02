@@ -1,0 +1,84 @@
+﻿@model SIGA.Entities.Models.Documento
+
+@{
+    ViewBag.Title = "Documento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Documento</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Cliente.NomeCliente)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Cliente.NomeCliente)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ClienteTipoDocumento.CodigoDeClassificacao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ClienteTipoDocumento.CodigoDeClassificacao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Lote.NumeroLote)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Lote.NumeroLote)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DescricaoDocumento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DescricaoDocumento)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataCriacaoDocumento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataCriacaoDocumento)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DataDoDocumento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DataDoDocumento)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CodeDeBarrasDocumento)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CodeDeBarrasDocumento)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Disponivel)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Disponivel)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    <div>
+        <a class="btn btn-xs" href="@Url.Action("Index")"> Voltar</a>
+    </div>
+</p>

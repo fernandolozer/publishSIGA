@@ -1,0 +1,136 @@
+﻿@using GridMvc.Html
+@using SIGA.Entities.Models
+@model Tuple<System.Collections.Generic.List<SIGA.Entities.Models.OrdemServico>, OrdemServico>
+@{
+    ViewBag.Title = "Gerenciar OS";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<p class="widget-title">
+    <a class="btn btn-primary btn-sm" href="@Url.Action("Create")">
+        Criar Novo
+        <i class="ace-icon fa fa-file-o icon-on-right bigger-110">
+        </i>
+    </a>
+</p>*@
+
+
+@using (Html.BeginForm())
+{
+    <div class="widget-box">
+        <div class="widget-header">
+            <h4 class="widget-title">Pesquisar OS</h4>
+        </div>
+        <div class="widget-body">
+            <div class="widget-main">
+                <form class="form-inline">
+                    <div class="col-xs-6 col-sm-3">
+                        @Html.EnumDropDownListFor(model => model.Item2.StatusOrdemServico, "[ Status ]", htmlAttributes: new { @class = "form-control" })
+                    </div>
+                    <div class="col-xs-6 col-sm-3">
+                        @Html.EnumDropDownListFor(model => model.Item2.TipoOrdemServico, "[ Tipo ]", htmlAttributes: new { @class = "form-control" })
+                    </div>
+                    <div class="col-xs-6 col-sm-3">
+                        @Html.TextBox("txtNumero", null, htmlAttributes: new { @class = "form-control text-box single-line", @placeholder = "Número da OS" })
+                    </div>
+                    <div class="col-xs-6 col-sm-2">
+                        Todos: @Html.CheckBox("txtTodos", false)
+                    </div>
+                    <input type="submit" value="Pesquisar" class="btn btn-info btn-sm" />
+                </form>
+            </div>
+            @Html.Grid(Model.Item1).SetLanguage("pt-br").Columns(g =>
+                {
+                    g.Add()
+                        .Css("action-buttons")
+                        .Titled("OS Cliente")
+                        .Encoded(false)
+                        .Sanitized(false)
+                        .RenderValueAs(p => @Html.ActionLink(" ", "Relatorio", new { id = p.IdOrdemServico }, new { @class = "gray ace-icon fa fa-print bigger-140", @title = "Relatório", @data_rel = "tooltip", @target = "_blank" }).ToHtmlString())
+                        .SetWidth(50);
+                    g.Add()
+                        .Css("action-buttons")
+                        .SetWidth(50)
+                        .Titled("OS Interna")
+                        .Encoded(false)
+                        .Sanitized(false)
+                        .RenderValueAs(p => @Html.ActionLink(" ", "RelatorioInterno", new { id = p.IdOrdemServico }, new { @class = "gray ace-icon fa fa-list-ol bigger-140", @title = "Lista para recuperar os documentos", @data_rel = "tooltip", @target = "_blank" }).ToHtmlString());
+
+                    g.Add(n => n.IdOrdemServico).Titled("Código").SetWidth(70);
+                    g.Add(n => n.NomeOrdemServico).Titled("Nome");
+                    g.Add(n => n.StatusOrdemServico).Titled("Status").RenderValueAs(u => RetornaNomeStatus(u)).Encoded(false);
+                    g.Add(n => n.SolicitanteUser.Nome).Titled("Solicitante");
+                    g.Add(n => n.DataPedidoOrdemServico).Titled("Data Pedido").Format("{0:dd-MM-yyyy}");
+                    g.Add(n => n.TipoOrdemServico).Titled("Tipo");
+                    g.Add()
+                        .Css("action-buttons")
+                        .SetWidth(50)
+                        .Titled("Ação")
+                        .Encoded(false)
+                        .Sanitized(false)
+                        .RenderValueAs(p =>
+                            p.StatusOrdemServico == OrdemServico.StatusOrdemServicos.Requisitado
+                                ?
+                                @Html.ActionLink(" ", "MudarStatusOS", new { id = p.IdOrdemServico }, new { @class = "red ace-icon fa fa-dropbox bigger-140", @title = "Em Preparação", @data_rel = "tooltip" }).ToHtmlString()
+                                :
+                                p.StatusOrdemServico == OrdemServico.StatusOrdemServicos.EmPreparacao
+                                    ?
+                                    @Html.ActionLink(" ", "MudarStatusOS", new { id = p.IdOrdemServico }, new { @class = "blue ace-icon fa fa-automobile bigger-140", @title = "Em Transporte", @data_rel = "tooltip" }).ToHtmlString()
+                                    :
+                                    p.StatusOrdemServico == OrdemServico.StatusOrdemServicos.EmTransporte
+                                        ?
+                                        @Html.ActionLink(" ", "MudarStatusOS", new { id = p.IdOrdemServico }, new { @class = "pink ace-icon fa fa-check bigger-140", @title = "Entregue Para o Cliente", @data_rel = "tooltip" }).ToHtmlString()
+                                        :
+                                        p.StatusOrdemServico == OrdemServico.StatusOrdemServicos.Entregue
+                                            ?
+                                            @Html.ActionLink(" ", "MudarStatusOS", new { id = p.IdOrdemServico }, new { @class = "orange ace-icon fa fa-automobile bigger-140", @title = "Em Transporte Para a Mantenedora", @data_rel = "tooltip" }).ToHtmlString()
+                                            :
+                                                p.StatusOrdemServico == OrdemServico.StatusOrdemServicos.EmTransporteMantenedora
+                                                ?
+                                                @Html.ActionLink(" ", "MudarStatusOS", new { id = p.IdOrdemServico }, new { @class = "orange ace-icon fa fa-thumbs-o-up bigger-140", @title = "Entregue Para a Mantenedora", @data_rel = "tooltip" }).ToHtmlString()
+                                                :
+                                                    p.StatusOrdemServico == OrdemServico.StatusOrdemServicos.EntregueParaMantenedora
+                                                        ?
+                                                        @Html.ActionLink(" ", "MudarStatusOS", new { id = p.IdOrdemServico }, new { @class = "green ace-icon fa fa-check bigger-140", @title = "Finalizado", @data_rel = "tooltip" }).ToHtmlString()
+                                                        :
+                                                        null
+
+                        //@Html.ActionLink(" ", "Edit", new { id = p.IdOrdemServico }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Visualizar", @data_rel = "tooltip" }).ToHtmlString() +
+
+                        );
+
+                }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+
+
+            @helper RetornaNomeStatus(OrdemServico os)
+{
+    string retorno = string.Empty;
+    switch (os.StatusOrdemServico)
+    {
+        case OrdemServico.StatusOrdemServicos.Aberto:
+            retorno = "Aberto";
+            break;
+        case OrdemServico.StatusOrdemServicos.EmPreparacao:
+            retorno = "Em Preparação";
+            break;
+        case OrdemServico.StatusOrdemServicos.EmTransporte:
+            retorno = "Em Transporte";
+            break;
+        case OrdemServico.StatusOrdemServicos.EmTransporteMantenedora:
+            retorno = "Em Transporte para Mantenedora";
+            break;
+        case OrdemServico.StatusOrdemServicos.Entregue:
+            retorno = "Entregue no Cliente";
+            break;
+        case OrdemServico.StatusOrdemServicos.EntregueParaMantenedora:
+            retorno = "Entregue para Mantenedora";
+            break;
+        case OrdemServico.StatusOrdemServicos.Requisitado:
+            retorno = "Requisitado";
+            break;
+    }
+    <text>@retorno</text>
+}
+        </div>
+    </div>
+}

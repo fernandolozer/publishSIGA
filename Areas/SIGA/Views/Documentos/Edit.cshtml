@@ -1,0 +1,160 @@
+﻿@model SIGA.Entities.Models.Documento
+@using SIGA.Entities.Models;
+@{
+    ViewBag.Title = "Documento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var urlCaixaManual = Url.Content("~/SIGA/Documentos/GetInfoCaixa");
+    var urlInserirDocumento = Url.Content("~/SIGA/Documentos/IncluirDocumento");    
+
+}
+<script src="~/Content/js/documentos.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    jQuery(function ($) {
+        $('#gritter-without-image').on(ace.click_event, function () {
+            $.gritter.add({
+                // (string | mandatory) the heading of the notification
+                title: 'This is a notice without an image!',
+                // (string | mandatory) the text inside the notification
+                text: 'This will fade out after a certain amount of time. Vivamus eget tincidunt velit. Cum sociis natoque penatibus et <a href="#" class="orange">magnis dis parturient</a> montes, nascetur ridiculus mus.',
+                class_name: 'gritter-success' + (!$('#gritter-light').get(0).checked ? ' gritter-light' : '')
+            });
+
+            return false;
+        });
+
+
+        $('#txtCaixaInfoManual').focusout(function () {
+            EsconderMensagemErro();
+            $('#lblConfirmacaoCaixa').text('');
+            $.ajax({
+                url: '@urlCaixaManual',
+                type: 'POST',
+                data: { IdCliente: $('#idClienteTipoDocumento').val(), NumeroCaixa: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    $('#selLote').empty();
+                    console.log(data);
+                    if (data == null || data.Count == 0) {
+                        MostrarLotesCaixa(false);
+                        $('#lblConfirmacaoCaixa').text('Caixa não Encontrada');
+                        $('#divMsgErro').show('fast');
+                    }
+                    $('#divMsgErro').hide('fast');
+                    MostrarLotesCaixa(true);
+                    $('#selLote').append($('<option />', { value: "0", text: "[ Selecione ]" }));
+                    $.each(data, function (key, textValue) {
+                        $('#selLote').append($('<option />', { value: key, text: textValue }));
+                    });
+                },
+                error: function () {
+                    $('#lblConfirmacaoCaixa').text('Caixa não Encontrada.');
+                    $('#divMsgErro').show('fast');
+                    MostrarLotesCaixa(false);
+                }
+            });
+        });
+
+        $('#btnVoltar').click(function () {
+            window.history.back();
+        });
+       
+
+    });
+</script>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Documento</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.IdDocumento)
+        @Html.HiddenFor(model => model.DataCriacaoDocumento)
+        @Html.HiddenFor(model => model.IdClienteTipoDocumento)
+        
+        <div class="row">
+            <div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.IdCliente, "Cliente", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("IdCliente", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.IdCliente, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.IdSetor, "Setor", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("IdSetor", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idSetorTipoDocumento", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.IdSetor, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.IdClienteTipoDocumento, "Tipo de Documento", htmlAttributes: new { @class = "control-label" })
+                @Html.DropDownList("IdClienteTipoDocumento", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idTipoDocumento", @readonly = "readonly" })
+                @Html.ValidationMessageFor(model => model.IdClienteTipoDocumento, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="row">
+            @*<div class="col-xs-6 col-sm-4">
+                    @Html.LabelFor(model => model.DescricaoDocumento, htmlAttributes: new { @class = "control-label" })
+                    @Html.EditorFor(model => model.DescricaoDocumento, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.DescricaoDocumento, "", new { @class = "text-danger" })
+                </div>*@
+            <div class="col-xs-6 col-sm-4">
+                @Html.LabelFor(model => model.DataDoDocumento, htmlAttributes: new { @class = "control-label" })
+                @Html.EditorFor(model => model.DataDoDocumento, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.DataDoDocumento, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-xs-6 col-sm-4">
+                <label id="lblCaixaInfoManual" class="control-label">Caixa</label>
+                <input id="txtCaixaInfoManual" type="text" class="form-control" value="@Model.Lote.Caixa.NumeroCaixa" />
+            </div>
+
+            <div class="col-xs-6 col-sm-4">
+                <div id="divMsgErro" style="display:none;">
+                    <br />
+                    <label id="lblConfirmacaoCaixa" class="control-label"></label>
+                </div>
+                <div id="divLote">
+                    @Html.LabelFor(model => model.IdLote, "Lote", htmlAttributes: new { @class = "control-label" })
+                    @Html.DropDownListFor(m => m.IdLote, null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "selLote" })
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="row">
+            <span class="right">&nbsp;</span>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12" id="replacetarget">
+                @{ Html.RenderAction("Index", "CamposDocumentos", new { id = Model.IdDocumento }); }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-xs-6 col-sm-12">                
+                <input id="btnSalvar" type="submit" value="Salvar Alterações" class="btn btn-primary" />
+                <input id="btnVoltar" type="button" value="Voltar" class="btn btn-primary" />
+            </div>
+        </div>
+
+    </div>
+}
+
+<!-- modal placeholder-->
+<div id='myModal' class='modal fade in'>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id='myModalContent'></div>
+        </div>
+    </div>
+</div>
+
+
+
+@*@section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }*@

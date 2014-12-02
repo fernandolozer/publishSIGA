@@ -1,0 +1,122 @@
+﻿@using SIGA.Entities.Models;
+@using System.Linq;
+@{
+    ViewBag.Title = "Relatorio de Expurgo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    List<Documento> documentos = ViewBag.Documentos as List<Documento>;
+    List<Setor> setores = ViewBag.Setores as List<Setor>;
+    SIGA.Data.Business.DocumentoBusiness documentoBusiness = new SIGA.Data.Business.DocumentoBusiness();
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#idClienteTipoDocumento").change(function () {
+            var elements = "";
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Setor ]</option>';
+                $('#idSetorTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@url',
+                type: 'POST',
+                data: { idCliente: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ TODOS ]</option>';
+                    $.each(data, function () {
+                        elements = elements + '<option value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                    });
+                    $('#idSetorTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });
+
+
+    });
+
+</script>
+
+@using (Html.BeginForm())
+{
+    <div class="no-print widget-box">
+        <div class="widget-header">
+            <h4 class="widget-title">Selecione o Cliente/Setor</h4>
+        </div>
+        <div class="widget-body">
+            <div class="widget-main">
+                <form class="form-inline">
+                    <div class="col-xs-5 col-sm-3">
+                        @Html.DropDownList("IdCliente", null, "[ Cliente ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento" })
+                    </div>
+                    <div class="col-xs-5 col-sm-3">
+                        @Html.DropDownList("IdSetor", null, "[ Setor ]", htmlAttributes: new { @class = "form-control", @id = "idSetorTipoDocumento" })
+                    </div>
+
+                    <div class="col-xs-2 col-sm-3">
+                        @Html.TextBox("Ano", null, htmlAttributes: new { @class = "form-control text-box single-line", @placeholder = "[ Ano ]" })
+
+                        
+                    </div>
+                    <input type="submit" value="Pesquisar" class="btn btn-info btn-sm" />
+                </form>
+            </div>
+        </div>
+    </div>
+
+}
+@if (documentos.Count > 0)
+{
+    foreach (Setor setor in setores)
+    {
+
+        <h3 class="widget-title grey lighter">
+            @setor.NomeSetor
+        </h3>
+
+        <div>
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th class="center">Caixa</th>
+                        <th class="center">Lote</th>
+                        <th>Tipo Documento</th>
+                        <th>Documento</th>
+                        <th>Prazo de guarda</th>
+                        <th>Destino</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (Documento item in documentos)
+                    {
+                        if (item.Setor.IdSetor == setor.IdSetor)
+                        {
+                            <tr>
+                                <td class="center">@item.Lote.Caixa.NumeroCaixa</td>
+                                <td class="center">@item.Lote.NumeroLote</td>
+
+                                <td>
+                                    @item.ClienteTipoDocumento.TipoDocumento.NomeTipoDocumento
+                                </td>
+                                <td class="hidden-xs">
+                                    @Html.Raw(documentoBusiness.ObterDescricaoCompletaDocumento(item.IdDocumento).ToString())
+                                </td>
+                                <td>
+                                    @item.ClienteTipoDocumento.TotalPrazo
+                                </td>
+                                <td>
+                                    @item.ClienteTipoDocumento.DestinacaoFinal
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+        </div>
+
+    }
+    <div class="space"></div>
+}

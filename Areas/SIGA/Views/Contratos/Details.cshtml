@@ -1,0 +1,25 @@
+﻿@model SIGA.Entities.Models.Contrato
+
+@{
+    ViewBag.Title = "Contrato";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Contrato</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Cliente.NomeCliente)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Cliente.NomeCliente)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdContrato }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

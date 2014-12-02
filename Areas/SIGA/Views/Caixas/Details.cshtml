@@ -1,0 +1,65 @@
+﻿@model SIGA.Entities.Models.Caixa
+
+@{
+    ViewBag.Title = "Caixa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Caixa</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.EstruturaFisica.NomeEstrutura)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EstruturaFisica.NomeEstrutura)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Galpao.NomeGalpao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Galpao.NomeGalpao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NumeroCaixa)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NumeroCaixa)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NumeroCaixaCliente)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NumeroCaixaCliente)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NomeCaixa)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NomeCaixa)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.QuantidadeDeLotes)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.QuantidadeDeLotes)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdCaixa }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>

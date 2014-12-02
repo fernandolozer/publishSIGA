@@ -1,0 +1,41 @@
+﻿@model SIGA.Entities.Models.Descritor
+
+@{
+    ViewBag.Title = "Descritor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Descritor</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.NomeDescritor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NomeDescritor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TipoDadoDescritor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TipoDadoDescritor)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Requerido)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Requerido)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.IdDescritor }) |
+    @Html.ActionLink("Voltar", "Index")
+</p>
