@@ -1,0 +1,136 @@
+﻿@model SIGA.Web.Areas.SIGA.Models.EtiquetasCaixa
+@{
+    ViewBag.Title = "Etiquetas de Lotes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    var urlGerarEtiquetas = Url.Content("~/SIGA/Etiquetas/GerarEtiquetasLote");
+    var idCliente = ViewData["IdCliente"];
+    var idsetor = ViewData["IdSetor"];
+    var idTemporalidade = ViewData["IdTemporalidade"];    
+}
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#IdClienteTipoDocumento").change(function () {
+            var elements = "";
+            var setorId = '@idsetor';
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Selecione ]</option>';
+                $('#idSetorTipoDocumento').empty().attr('disabled', true).append(elements);
+                $('#idTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@url',
+                type: 'POST',
+                data: { idCliente: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Selecione ]</option>';
+                    $.each(data, function () {
+                        if (setorId == 0) {
+                            elements = elements + '<option value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                        }
+                        else {
+                            elements = elements + '<option selected value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                        }
+
+                    });
+                    $('#idSetorTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });
+
+        $('#btnGerarEtiquetasqqq').click(function () {
+            var varidCliente = $("#IdClienteTipoDocumento").val();
+
+            var varidSetor = $("#idSetorTipoDocumento").val();
+            if (varidSetor == null || varidSetor == '') {
+                varidSetor = 0;
+            }
+
+            var varCaixaIni = $("#txtCaixaInicial").val();
+            if (varCaixaIni == null || varCaixaIni == '') {
+                varCaixaIni = 0;
+            }
+
+            var varCaixaFim = $("#txtCaixaFinal").val();
+            if (varCaixaFim == null || varCaixaFim == '') {
+                varCaixaFim = 0;
+            }
+
+            $.ajax({
+                url: '@urlGerarEtiquetas',
+                type: 'POST',
+                data: {
+                    idCliente: varidCliente, idSetor: varidSetor,
+                    CaixaInicial : varCaixaIni, CaixaFinal : varCaixaFim
+                },
+                datatype: 'json',
+                success: function (response, status, request) {
+                    console.log(response);
+                },
+                error: function () {
+                    alert("Erro ao Gerar Etiquetas dos lotes");
+                }
+            });
+        });
+
+    });
+
+</script>
+
+@using (Html.BeginForm())
+{
+    <div class="widget-box">
+        <div class="widget-header">
+            <h4 class="widget-title">Etiquetas Para Lotes</h4>
+        </div>
+        <div class="widget-body">
+            <div class="widget-main">
+                <div>
+                    <div class="row">
+                        <div class="col-xs-6 col-sm-4">
+                            <label class="control-label">Cliente</label>
+                            @Html.DropDownListFor(p => p.idCliente, (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new {@id="IdClienteTipoDocumento",  @class = "form-control" })
+                        </div>
+                        <div class="col-xs-6 col-sm-4">
+                            <label class="control-label">Setor</label>
+                            @Html.DropDownListFor(p => p.idSetor, (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new { @id = "idSetorTipoDocumento", @class = "form-control" })
+
+                        </div>
+                        <div class="col-xs-6 col-sm-4">
+                            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6 col-sm-4">
+                            <label class="control-label">Caixa Inicial</label>
+                            @Html.TextBoxFor(p => p.CaixaInicial, new { @class = "form-control" })                            
+                        </div>
+                        <div class="col-xs-6 col-sm-4">
+                            <label class="control-label">Caixa Final</label>
+                            @Html.TextBoxFor(p => p.CaixaFinal, new { @class = "form-control" })
+                        </div>
+                        <div class="col-xs-6 col-sm-4">
+
+                        </div>
+                    </div>
+                    
+                    <br />
+                    <div class="row right">
+                        <div class="col-xs-6 col-sm-12">
+                            <input type="submit" id="btnGerarEtiquetas" value="Gerar Etiquetas dos Lotes" class="btn btn-primary" />
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+       
+    </div>
+}
