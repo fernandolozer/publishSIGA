@@ -2,6 +2,7 @@
     ViewBag.Title = "DevolucaoOrdemServico";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = Url.Content("~/SIGA/OrdemServicos/ObterOs");
+    var urlCaixaManual = Url.Content("~/SIGA/Documentos/GetInfoCaixa");
 
 }
 
@@ -30,65 +31,87 @@
         <div>
             <div>
                 <div ng-show="ordemServico != null" style="padding:10px;">
-                    <div class="row">
-                        <div class="col-xs-6 col-sm-4">
-                            <span class="control-label">Ordem de Serviço</span>
-                            <input type="text" readonly value="{{ordemServico.IdOrdemServico}}" />
-                        </div>
-                        <div class="col-xs-6 col-sm-4">
-                            <span class="control-label">Cliente</span>
-                            <input type="text" readonly value="{{ordemServico.Cliente}}" />
-                        </div>
-                        <div class="col-xs-6 col-sm-4">
+                    <div class="bs-callout">
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-4">
+                                <span class="control-label">Ordem de Serviço</span>
+                                <input type="text" readonly value="{{ordemServico.IdOrdemServico}}" />
+                            </div>
+                            <div class="col-xs-6 col-sm-4">
+                                <span class="control-label">Cliente</span>
+                                <input type="text" readonly value="{{ordemServico.Cliente}}" />
+                            </div>
+                            <div class="col-xs-6 col-sm-4">
 
+                            </div>
                         </div>
-
                     </div>
                     <br />
                     <h5>Itens da OS</h5>
-                    <table class="table-hover table-striped">
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Selecionar</th>
-                                <th>Codigo</th>
-                                <th>Documento</th>
-
+                                <th width="10%">Selecionar</th>
+                                <th width="10%">Codigo</th>
+                                <th width="40%">Documento</th>
+                                <th width="20%">Local Origem</th>
                             </tr>
                         </thead>
-                        <tr ng-repeat="itemOS in ordemServico.ListaItens">
-                            <td class="col-xs-1 col-sm-1">
+                        <tr ng-repeat="itemOS in ordemServico.ListaItens" style="margin: 20px;">
+                            <td >
                                 <input type="checkbox" ng-model="itemOS.Selected" />
                             </td>
-                            <td class="col-xs-1 col-sm-1">
+                            <td >
                                 <span>{{itemOS.IdItemOrdemServico}}</span>
                             </td>
-                            <td class="col-xs-6 col-sm-4">
+                            <td>
                                 <div ng-repeat="desc in itemOS.Documento.Descritores">
                                     <span>{{desc.NomeDescritor}}</span> - <strong>{{desc.ValorDescritor}}</strong>
                                 </div>
                             </td>
-
+                            <td>
+                                <div>
+                                    Caixa = <strong>{{itemOS.Documento.NumeroCaixa}}</strong>
+                                </div>
+                                <div>
+                                    Lote = <strong>{{itemOS.Documento.NumeroLote}}</strong>
+                                </div>
+                                <div>
+                                    Sequencial = <strong>{{itemOS.Documento.SequencialDocumentoLote}}</strong>
+                                </div>
+                            </td>
                         </tr>
                     </table>
 
                     <hr />
-                    <h5>Selecione o Destino dos documentos</h5>
-                    <select ng-model="modoDestino">
-                        <option value="0" selected>[ SELECIONE ]</option>
-                        <option value="1">Caixa Original dos Documentos</option>
-                        <option value="2">Nova Caixa / Lote</option>
-                    </select>
-                    <br />
+                    <div class="row">
+                        <div class="col-sm-12 col-mg-12 col-lg-12">
+                            <h5>Selecione o Destino dos documentos</h5>
+                            <select ng-model="modoDestino">
+                                <option value="0" selected>[ SELECIONE ]</option>
+                                <option value="1">Caixa Original dos Documentos</option>
+                                <option value="2">Nova Caixa / Lote</option>
+                            </select>
+                        </div>
+                    </div>
                     <div ng-show="modoDestino == 2">
-                        <br />
-                        <span class="control-label">Informe a Caixa</span>
-                        <input type="text" />
-                        <span class="control-label">Selecione o Lote</span>
-                        <select></select>
-                        <br />
-                        <input id="btnNovoLote" type="button" value="Novo Lote" class="btn btn-primary" />
-                        <input id="btnNovaCaixa" type="button" value="Nova Caixa" class="btn btn-primary" />
-
+                        <div class="row">
+                            <div class="col-mg-4 col-sm-4 col-lg-4">
+                                <span class="control-label">Informe a Caixa</span>
+                                <input class="form-control" type="text" ng-model="CaixaSelecionada" ng-change="loadLotes()" />
+                            </div>
+                            <div class="col-mg-4 col-sm-4 col-lg-4">
+                                <span class="control-label">Selecione o Lote</span>
+                                <select class="form-control" ng-model="LoteSelecionado" ng-options="k as v for (k, v) in Lotes">
+                                    <option value="">[ Selecione ]</option>
+                                </select>
+                            </div>
+                            <div class="col-mg-4 col-sm-4 col-lg-4">
+                                <input id="btnNovoLote" type="button" value="Novo Lote" class="btn btn-primary" />
+                                <input id="btnNovaCaixa" type="button" value="Nova Caixa" class="btn btn-primary" />
+                            </div>
+                        </div>
+                       
                     </div>
                     <br />
                     <div class="row right" style="align-items:flex-end; ">
@@ -129,6 +152,23 @@
             }).error(function (data) {
                 $scope.erroBusca = 1;
                 $scope.ordemServico = null;
+
+            });
+        };
+
+        $scope.loadLotes = function () {
+            $http({
+                method: 'POST',
+                url: '@urlCaixaManual',
+                data: { idCliente: $scope.ordemServico.IdCliente, NumeroCaixa: $scope.CaixaSelecionada },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                console.log(data);
+                $scope.Lotes = data;
+
+            }).error(function (data) {
+                $scope.Lotes = null;
 
             });
         };

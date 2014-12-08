@@ -1,0 +1,343 @@
+﻿@using GridMvc.Html
+@using SIGA.Entities.Models
+
+@model IEnumerable<SIGA.Entities.Models.Documento>
+
+@{
+    ViewBag.Title = "Documento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var idCliente = ViewData["IdCliente"];
+    var idsetor = ViewData["IdSetor"];
+    var idTemporalidade = ViewData["IdTemporalidade"];
+
+    List<Documento> listaDocumentos = ViewBag.ListaDocumentos as List<Documento>;
+
+    var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    var urlDescritores = Url.Content("~/SIGA/Documentos/CarregaDescritores");
+
+
+    var urlTipoDoc = Url.Content("~/SIGA/Documentos/CarregaListaTiposDocumentosSetor");
+    var urlPesquisaAvancada = Url.Content("~/SIGA/Documentos/PesquisaAvancada");
+    var urlPesquisaDocumento = Url.Content("~/SIGA/Documentos/PesquisaDeDocumentos");
+    var urlIncluirOS = Url.Content("~/SIGA/Documentos/IncluirNaOS");
+    
+
+    int ClienteSelecionado = ViewData["ClienteSelecionado"] == null ? 0 : (int)ViewData["ClienteSelecionado"];
+    int SetorSelecionado = ViewData["SetorSelecionado"] == null ? 0 : (int)ViewData["SetorSelecionado"];
+    int TipoDocumentoSelecionado = ViewData["TipoDocumentoSelecionado"] == null ? 0 : (int)ViewData["TipoDocumentoSelecionado"];
+    Dictionary<string, string> DescritoresPReenchidos = ViewData["DescritoresPreenchidos"] as Dictionary<string, string>;
+
+    var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
+
+    var boolPesquisaAvancada = ViewBag.Avancada;
+}
+
+<script src="~/Content/js/documentos.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+    $(function () {
+        //Ajax para carregar os setores do cliente
+
+        $(document).ready(function () {
+            console.log('@ClienteSelecionado');
+            console.log('@SetorSelecionado');
+            if ('@ClienteSelecionado' != '') {
+                $("#IdClienteTipoDocumento").val('@ClienteSelecionado');
+                $("#IdClienteTipoDocumento").change();
+            }
+
+            if ('@SetorSelecionado' != '') {
+                $("#idSetorTipoDocumento").val('@SetorSelecionado');
+            }
+
+        });
+
+        $("#IdClienteTipoDocumento").change(function () {
+            var elements = "";
+            LimpaPesquisaDescritores()
+            var setorId = '@idsetor';
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Selecione ]</option>';
+                $('#idSetorTipoDocumento').empty().attr('disabled', true).append(elements);
+                $('#idTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@url',
+                type: 'POST',
+                data: { idCliente: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Selecione ]</option>';
+                    $.each(data, function () {
+                        if (setorId == 0) {
+                            elements = elements + '<option value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                        }
+                        else {
+                            elements = elements + '<option selected value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
+                        }
+
+                    });
+                    $('#idSetorTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });
+
+        //Ajax para carregar os tipos documentos dos setores
+        $("#idSetorTipoDocumento").change(function () {
+            var elements = "";
+            LimpaPesquisaDescritores()
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Selecione ]</option>';
+                $('#idTipoDocumento').empty().attr('disabled', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@urlTipoDoc',
+                type: 'POST',
+                data: { idSetor: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Selecione ]</option>';
+                    $.each(data, function () {
+                        elements = elements + '<option value="' + this.IdTipoDocumento + '">' + this.NomeTipoDocumento + '</option>';
+                    });
+                    $('#idTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+        });
+
+        // ao mudar o tipo de documento, tem que criar os descritores.
+        $("#idTipoDocumento").change(function () {
+            var tabela = "";
+            LimpaPesquisaDescritores()
+            if ($(this).val() == '') {
+                $('#divDescritores').html('');
+                return;
+            }
+            $.ajax({
+                url: '@urlDescritores',
+                type: 'GET',
+                data: { IdTipoDocumento: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    MontarListaDescritores(data);
+                }
+            });
+        });
+
+        function MontarListaDescritores(data) {
+            $('#divDescritores').html('');
+            var classPrimeiro = 'primeiroDescritor';
+            tabela = '<div class="panel panel-default"><table class="table"><tbody><tr><th>Nome do Descritor</th><th>Valor</th></tr>';
+            $.each(data, function () {
+                tabela = tabela + '<tr><td class="col-xs-6 col-sm-4">'
+                tabela = tabela + ' <input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="' + this.NomeDescritor + '">';
+                tabela = tabela + '</td><td>';
+                var valor = ''
+                if (this.ValorDescritor != null) {
+                    valor = this.ValorDescritor;
+                }
+                var classTipoDescritor = '';
+                if (this.TipoDescritor == 4) {
+                    classTipoDescritor = ' onkeypress="javascript: mascara(this, cnpj_mask);" maxlength="18" ';
+                }
+                if (this.TipoDescritor == 5) {
+                    classTipoDescritor = ' onkeypress="javascript: mascara(this, cpf_mask);" maxlength="14" ';
+                }
+                var strTamanhoMaximo = '';
+                if (this.TamanhoMaximo > 0) {
+                    strTamanhoMaximo = ' maxlength="' + this.TamanhoMaximo + '" ';
+                }
+                console.log(this.TamanhoMaximo);
+                tabela = tabela + '<input class="' + classPrimeiro +
+                    ' form-control text-box single-line descritor" data-val="true" id="' + this.idDescritor +
+                    '" name="' + this.idDescritor + '" type="text" value="' + this.ValorDescritor + '" ' + classTipoDescritor + strTamanhoMaximo + ' >';
+                tabela = tabela + ' </td></tr>';
+                classPrimeiro = '';
+            });
+
+            tabela = tabela + '</tbody></table></div>';
+            $(tabela).appendTo('#divDescritores');
+        };
+
+        $("#btnLimpar").click(function () {
+            var listaImputs = document.getElementsByClassName('descritor');
+            for (var i = 0; i < listaImputs.length; i++) {
+                listaImputs[i].value = '';
+            }
+            $("#idDocumentoEmEdicao").val('');
+            $(".primeiroDescritor").focus();
+        });
+
+        $("#divDescritores").on("keypress", "input", function () {
+            if (event.which == 13) {
+                event.preventDefault();
+                PesquisaDocumentos();
+            }
+        });
+
+        //############################################
+        // Resultado da pesquisa
+
+        function PreencheDocumentos(dados) {
+            $('#divDocumentos').html('');
+            var tabela = "";
+            tabela = ' <table class="table"><tbody><tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width: 80px">Ações</th></tr>';
+            $.each(dados, function () {
+                tabela = tabela + '<tr>';
+                tabela = tabela + '<td>' + this.SequencialDocumentoLote + '</td>';
+                tabela = tabela + '<td>' + this.DescricaoDocumento + '</td>';
+                tabela = tabela + '<td>' + this.DescricaoTipoDocumento + '</td>'
+                tabela = tabela + '<td style="white-space: nowrap;" class="grid-cell action-buttons">';
+                console.log(this.DescricaoDocumento + 'Está emprestado: ' + this.Emprestado);
+                if (this.Emprestado == true) {
+                    tabela = tabela + '<span>' + this.EmprestadoCom + '</span>';
+                }
+                else {
+                    tabela = tabela + '<input type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" data-iddocumento="' + this.IdDocumento + '"  title="Incluir na OS" value="Incluir na OS" data-original-title="Incluir na OS" /> ';
+                }
+                
+                if ('@permissaoFull' == 'Desabilitado') {
+                    tabela = tabela + '<a class="blue ace-icon fa fa-search-plus bigger-140" href="/SIGA/Documentos/Details/' + this.IdDocumento + '" title="Visualizar"> </a>' +
+                        '<a class="green ace-icon fa fa-pencil bigger-140" href="/SIGA/Documentos/Edit/' + this.IdDocumento + '" title="Editar"> </a>';
+                }
+                tabela = tabela + '</td>';
+
+                tabela = tabela + '</tr>'
+
+            });
+            tabela = tabela + ' </tbody></table>';
+            $(tabela).appendTo('#divDocumentos');
+        }
+
+        $("#btnPesquisaAvancada").click(function () {
+            PesquisaDocumentos();
+        });
+        // para inserir documentos
+        function PesquisaDocumentos() {
+            var varidCliente = $("#IdClienteTipoDocumento").val();
+
+            var varidSetor = $("#idSetorTipoDocumento").val();
+            if (varidSetor == null || varidSetor == '') {
+                varidSetor = 0;
+            }
+
+            var varidTipoDocumento = $("#idTipoDocumento").val();
+            if (varidTipoDocumento == null || varidTipoDocumento == '') {
+                varidTipoDocumento = 0;
+            }
+
+            var dictionary = {};
+            var listaImputs = document.getElementsByClassName('descritor');
+            for (var i = 0; i < listaImputs.length; i++) {
+                dictionary[listaImputs[i].id] = listaImputs[i].value;
+            }
+            if (dictionary == null || dictionary == '') {
+                dictionary[0] = '';
+            }
+
+            $.ajax({
+                url: '@urlPesquisaDocumento',
+                type: 'POST',
+                data: {
+                    idCliente: varidCliente, idSetor: varidSetor,
+                    idClienteTipoDocumento: varidTipoDocumento,
+                    descritores: dictionary
+                },
+                datatype: 'json',
+                success: function (data) {
+                    // montar a lista de todos documentos no mesmo lote.
+                    PreencheDocumentos(data);
+                },
+                error: function () {
+                    alert("Erro na Pesquisa");
+                }
+            });
+        }
+
+
+        $("#divDocumentos").on("click", "input.btnAddOS", function () {
+            var idDocumento = this.getAttribute('data-iddocumento');
+            $.ajax({
+                url: '@urlIncluirOS',
+                type: 'POST',
+                data: {id : idDocumento},
+                datatype: 'json',
+                success: function (data) {
+                    alert("Adicionada a OS!");
+                },
+                error: function () {
+                    alert("Erro ao adicionar a OS");
+                }
+            });
+        });
+
+        function LimpaPesquisaDescritores() {
+            $('#divDocumentos').html('');
+            $('#divDescritores').html('');
+        }
+    });
+
+</script>
+
+@using (Html.BeginForm())
+{
+    <div class="widget-box">
+        <div class="widget-header">
+            <h4 class="widget-title">Pesquisa Avançada de Documentos</h4>
+        </div>
+        <div class="widget-body">
+            <div class="widget-main">
+                <div>
+                    <div class="row">
+                        <div class="col-xs-6 col-sm-4">
+                            <label class="control-label">Cliente</label>
+                            @Html.DropDownList("IdClienteTipoDocumento", (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new { @class = "form-control" })
+
+                        </div>
+                        <div class="col-xs-6 col-sm-4">
+                            <label class="control-label">Setor</label>
+                            <select id="idSetorTipoDocumento" disabled class="form-control"></select>
+                        </div>
+                        <div class="col-xs-6 col-sm-4">
+                            <label class="control-label">Tipo de Documento</label>
+                            <select id="idTipoDocumento" disabled class="form-control"></select>
+                        </div>
+                    </div>
+                    <br />
+                    <div id="divDescritores">
+
+                    </div>
+                    <br />
+                    <div class="row right">
+                        <div class="col-xs-6 col-sm-12">
+                            <input type="button" id="btnPesquisaAvancada" value="Pesquisar" class="btn btn-primary" />
+                            <input id="btnLimpar" type="button" value="Limpar Descitores" class="btn btn-primary" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-12" id="replacetarget">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Resultado da Pesquisa</strong>
+                    </div>
+                    <div id="divDocumentos">
+
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+}

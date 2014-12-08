@@ -1,0 +1,45 @@
+﻿@model SIGA.Entities.Models.Historico
+@{
+    ViewBag.Title = "VerificaDisponibilidadeDocumento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h4>Situação atual do Documento</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.IdTipoFuncionalidade)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IdTipoFuncionalidade)
+        </dd>
+
+        <dt>
+            Data do Último Histórico
+        </dt>
+
+        <dd>
+            @Model.DataRegistroHistorico.ToString("G")
+
+        </dd>
+
+        <dt>
+            Usuário Responsável
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Usuario.Nome)
+        </dd>
+
+
+    </dl>
+</div>
+<p>
+    <div>
+        <a class="btn btn-xs" href="@Url.Action("Index")"> Voltar</a>
+    </div>
+</p>
+
+
