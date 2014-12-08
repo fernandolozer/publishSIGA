@@ -145,8 +145,9 @@
                 $scope.ordemServico = data;
                 console.log(data);
                 $scope.erroBusca = 0;
-                if (data == '') {
+                if (data == "" || data == null || data.IdOrdemServico == null) {
                     $scope.erroBusca = 1;
+                    $scope.ordemServico = null;
                 }
 
             }).error(function (data) {
