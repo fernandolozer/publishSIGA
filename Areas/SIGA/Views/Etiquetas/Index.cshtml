@@ -1,6 +1,9 @@
 ﻿@{
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var urlMantenedoras = Url.Content("~/SIGA/Documentos/GetTodasMantenedoras");
+    var urlClientes = Url.Content("~/SIGA/Documentos/GetClientesMantenedora");
+
 }
 <script type="text/javascript">
     $(function () {
@@ -14,7 +17,62 @@
 </script>
 
 
-<div class="row">
+<div class="row" ng-controller="EtiquetasController">
+    <div class="col-sm-5">
+        <div class="widget-box">
+            <div class="widget-header">
+                <h4 class="widget-title">Folha de Etiquetas Personalizadas</h4>
+            </div>
+
+            <div class="widget-body">
+                <div class="widget-main no-padding">
+                    <form>
+                        <!-- <legend>Form</legend> -->
+                        <fieldset>                            
+                            <div class="row">
+                                <span class="help-block">
+                                    <label class="control-label">Selecione o Padrão</label>
+                                    <select id="ckbTipoEtiqueta" ng-model="ModeloEtiquetaSelecionado" class="form-control">
+                                        <option value="0">[ Selecione um padrão ]</option>
+                                        <option value="1">2 etiquetas de 4 cm</option>
+                                        <option value="3">2 etiquetas de 2,5 por 4,5 cm (Espelhadas)</option>
+                                        @*<option value="2">3 etiquetas de 5 cm</option>*@
+                                    </select>
+                                    <br />
+                                    <label class="control-label">Quantidade de linhas:</label>
+                                    <input id="txtTipoEtiqueta" ng-model="QuantidadeEtiquetas" type="number" class="form-control qtd" />
+                                </span>
+                            </div>
+                            <div class="row">
+                                <h5>Selecione um Cliente (Opcional)</h5>
+                                <div class="col-xs-12 col-sm-6">
+                                    <label class="control-label">Mantenedora</label>
+                                    <select class="form-control" ng-init="init()" ng-change="loadClientes()" ng-model="MantenedoraSelecionada" ng-options="item.IdMantenedora as item.NomeMantenedora for item in Mantenedoras">
+                                        <option value="">[ Selecione ]</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-xs-12 col-sm-6">
+                                    <label class="control-label">Cliente</label>
+                                    <select class="form-control" ng-disabled="Clientes == null" ng-change="loadSetores()" ng-model="ClienteSelecionado" ng-options="item.IdCliente as item.NomeCliente for item in Clientes">
+                                        <option value="">[ Selecione ]</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="form-actions center">
+
+                            <a href="@Url.Content("~/SIGA/Etiquetas/ImprimirFolhaPersonalizada")?modelo={{ModeloEtiquetaSelecionado}}&quantidade={{QuantidadeEtiquetas}}&idCliente={{ClienteSelecionado}}" id="btnGerarPersonalizadas" class=" btn btn-sm btn-success">
+                                Gerar
+                                <i class="ace-icon fa fa-print icon-on-right bigger-110"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-sm-5">
         <div class="widget-box">
             <div class="widget-header">
@@ -42,39 +100,57 @@
         </div>
     </div>
 
-    <div class="col-sm-5">
-        <div class="widget-box">
-            <div class="widget-header">
-                <h4 class="widget-title">Folha de Etiquetas Personalizadas</h4>
-            </div>
 
-            <div class="widget-body">
-                <div class="widget-main no-padding">
-                    <form>
-                        <!-- <legend>Form</legend> -->
-                        <fieldset>
-                            <label>Folha de Etiquetas Personalizada</label>
-                            <span class="help-block">
-                                <select id="ckbTipoEtiqueta">
-                                    <option value="0">[ Selecione um padrão ]</option>
-                                    <option value="1">2 etiquetas de 4 cm</option>
-                                    @*<option value="2">3 etiquetas de 5 cm</option>*@
-                                </select>
-                                <br />
-                                Quantidade de linhas:
-                                <input id="txtTipoEtiqueta" type="number" class="qtd" />
-                            </span>
-                        </fieldset>
-                        <div class="form-actions center">
-                            
-                            <a href="" id="btnGerarPersonalizadas" class=" btn btn-sm btn-success">
-                                Gerar
-                                <i class="ace-icon fa fa-print icon-on-right bigger-110"></i>
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
+
+
+<script type="text/javascript">
+    var EtiquetasController = function ($scope, $http) {
+
+        $scope.init = function () {
+
+            $scope.Clientes = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@urlMantenedoras',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Mantenedoras = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Mantenedoras = null;
+            });
+
+        };
+
+        $scope.loadClientes = function () {
+            $scope.Setores = null;
+            $scope.TiposDocumento = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@urlClientes',
+                data: { idMantenedora: $scope.MantenedoraSelecionada },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Clientes = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Clientes = null;
+            });
+        };
+
+
+    }
+</script>
