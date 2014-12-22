@@ -12,7 +12,7 @@
         $("#idMantenedora").change(function () {
             var elements = "";
             if ($(this).val() == '') {
-                elements = '<option value="">[ TODOS ]</option>';
+                elements = '<option value="">[ Cliente ]</option>';
                 $('#idCliente').empty().attr('disabled', true).append(elements);
                 return;
             }
@@ -22,7 +22,7 @@
                 data: { idMantenedora: $(this).val() },
                 datatype: 'json',
                 success: function (data) {
-                    elements = '<option value="">[ TODOS ]</option>';
+                    elements = '<option value="">[ Cliente ]</option>';
                     $.each(data, function () {
                         elements = elements + '<option value="' + this.IdCliente + '">' + this.NomeCliente + '</option>';
                     });
