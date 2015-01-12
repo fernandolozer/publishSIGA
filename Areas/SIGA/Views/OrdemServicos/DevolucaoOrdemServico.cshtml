@@ -3,6 +3,10 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = Url.Content("~/SIGA/OrdemServicos/ObterOs");
     var urlCaixaManual = Url.Content("~/SIGA/Documentos/GetInfoCaixa");
+    var urlProcessarDevolucao = Url.Content("~/SIGA/OrdemServicos/ProcessarDevolucao");
+    var urlNovaCaixa = Url.Content("~/SIGA/Documentos/NovaCaixa");
+    var urlNovoLote = Url.Content("~/SIGA/Documentos/NovoLote");
+
 
 }
 
@@ -30,7 +34,7 @@
         </div>
         <div>
             <div>
-                <div ng-show="ordemServico != null" style="padding:10px;">
+                <div ng-show="ordemServico != null && ordemServico.StatusOrdemServico != 'ProcessadaDevolucao' " style="padding:10px;">
                     <div class="bs-callout">
                         <div class="row">
                             <div class="col-xs-6 col-sm-4">
@@ -45,6 +49,10 @@
 
                             </div>
                         </div>
+                        <div class="row" ng-show="ordemServico.StatusOrdemServico != 'EntregueParaMantenedora'">
+                            <br />
+                            <div class="alert alert-warning" role="alert"><strong>Atenção:</strong> Qualquer motificação nesta ordem de serviço irá alterar o status da mesma para <strong>Entregue Para a Mantenedora</strong></div>
+                        </div>
                     </div>
                     <br />
                     <h5>Itens da OS</h5>
@@ -58,10 +66,10 @@
                             </tr>
                         </thead>
                         <tr ng-repeat="itemOS in ordemServico.ListaItens" style="margin: 20px;">
-                            <td >
+                            <td>
                                 <input type="checkbox" ng-model="itemOS.Selected" />
                             </td>
-                            <td >
+                            <td>
                                 <span>{{itemOS.IdItemOrdemServico}}</span>
                             </td>
                             <td>
@@ -107,20 +115,25 @@
                                 </select>
                             </div>
                             <div class="col-mg-4 col-sm-4 col-lg-4">
-                                <input id="btnNovoLote" type="button" value="Novo Lote" class="btn btn-primary" />
-                                <input id="btnNovaCaixa" type="button" value="Nova Caixa" class="btn btn-primary" />
+                                <input id="btnNovoLote" type="button" ng-click="novoLote()" value="Novo Lote" class="btn btn-primary" />
+                                <input id="btnNovaCaixa" type="button" ng-click="novaCaixa()" value="Nova Caixa" class="btn btn-primary" />
                             </div>
                         </div>
-                       
+                        <br />
+                        <div class="row" ng-show="erroCaixa != null && erroCaixa != '' ">
+                            <div class="alert alert-danger" role="alert">{{erroCaixa}}</div>
+                        </div>
                     </div>
                     <br />
                     <div class="row right" style="align-items:flex-end; ">
-                        <input ng-show="modoDestino != 0" type="button" value="Confirmar" class="btn btn-primary" />
+                        <input ng-show="modoDestino != 0" type="button" value="Confirmar" ng-click="processarDevolucao()" class="btn btn-primary" />
                     </div>
                 </div>
                 <div ng-show="erroBusca == 1">
-                    <div class="alert alert-warning" role="alert">Ordem de Serviço não encontrada. Verifique o Numero informado</div>
-
+                    <div class="alert alert-warning" role="alert">Ordem de Serviço de Devolução não encontrada. Verifique o Numero informado</div>
+                </div>
+                <div ng-show="ordemServico.StatusOrdemServico == 'ProcessadaDevolucao'">
+                    <div class="alert alert-success" role="alert">Ordem de Serviço já processada e todos os documentos entregues.</div>
                 </div>
             </div>
         </div>
@@ -145,9 +158,11 @@
                 $scope.ordemServico = data;
                 console.log(data);
                 $scope.erroBusca = 0;
-                if (data == "" || data == null || data.IdOrdemServico == null) {
+                if (data == "" || data == null || data.IdOrdemServico == null || data.erro == 1) {
                     $scope.erroBusca = 1;
                     $scope.ordemServico = null;
+                    if (data.mensagem != null)
+                        $scope.MensagemErro = data.mensagem;
                 }
 
             }).error(function (data) {
@@ -174,6 +189,65 @@
             });
         };
 
+        $scope.processarDevolucao = function () {
 
+            $http({
+                method: 'POST',
+                url: '@urlProcessarDevolucao',
+                data: { OrdemServico: $scope.ordemServico, modoDestino: $scope.modoDestino, numeroCaixa: $scope.CaixaSelecionada, numeroLote: $scope.LoteSelecionado },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                console.log(data);
+                $scope.loadOS();
+
+            }).error(function (data) {
+                $scope.Lotes = null;
+            });
+        };
+
+        $scope.novaCaixa = function () {
+            $scope.erroCaixa = '';            
+            $http({
+                method: 'POST',
+                url: '@urlNovaCaixa',
+                data: { idCliente: $scope.ordemServico.IdCliente },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                if (data.ExisteErro == true) {
+                    $scope.erroCaixa = "Ocorreu um erro ao Criar a caixa." + data.Mensagem;
+                    return;
+                }
+                $scope.CaixaSelecionada = data.Dados.NumeroCaixa;
+                $scope.loadLotes();
+
+            }).error(function () {
+                $scope.erroCaixa = "Erro ao Criar Caixa. Preencher Corretamente o cliente e o numero da caixa.";
+            });
+
+        };
+
+
+        $scope.novoLote = function () {
+            $scope.erroCaixa = '';
+            $http({
+                method: 'POST',
+                url: '@urlNovoLote',
+                data: { idCliente: $scope.ordemServico.IdCliente, NumeroCaixa: $scope.CaixaSelecionada },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                if (data.ExisteErro == true) {
+                    $scope.erroCaixa = "Ocorreu um erro ao Criar O Lote." + data.Mensagem;
+                    return;
+                }
+                $scope.loadLotes();
+            }).error(function () {
+                $scope.erroCaixa = "Erro ao Criar Lote. Preencher Corretamente o cliente e o numero da caixa.";
+            });
+
+        };
     }
+
 </script>

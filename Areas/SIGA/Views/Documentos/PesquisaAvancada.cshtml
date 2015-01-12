@@ -24,6 +24,7 @@
     var urlPesquisaDocumento = Url.Content("~/SIGA/Documentos/PesquisaDeDocumentos");
     var urlPesquisaFernando = Url.Content("~/SIGA/Documentos/PesquisaFernando");
     var urlIncluirOS = Url.Content("~/SIGA/Documentos/IncluirNaOS");
+    var urlDevolverOS = Url.Content("~/SIGA/Documentos/DevolverOS");
     var urlEditar = Url.Content("~/SIGA/Documentos/Edit/");
 
 
@@ -220,6 +221,39 @@
         };
 
 
+        $scope.incluirDocumentoNaOS = function (idDocumento) {
+            var varIdDocumento = idDocumento;
+            $http({
+                method: 'POST',
+                url: '@urlIncluirOS',
+                data: { id: varIdDocumento },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                alert("Adicionada a OS!");
+            }).error(function (data) {
+                alert("Erro ao adicionar a OS");
+            });
+
+        };
+
+        $scope.devolverDocumentoNaOS = function (idDocumento) {
+            var varIdDocumento = idDocumento;
+            $http({
+                method: 'POST',
+                url: '@urlDevolverOS',
+                data: { id: varIdDocumento },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                alert("Adicionada a OS!");
+            }).error(function (data) {
+                alert("Erro ao adicionar a OS");
+            });
+
+        };
+
+
     }
 
     // controle do modal
@@ -340,8 +374,9 @@
                                     </td>
                                     <td>{{doc.DescricaoTipoDocumento}} </td>
                                     <td style="white-space: nowrap;" class="grid-cell action-buttons">
-                                        <span ng-hide="doc.EmprestadoCom == ''"> {{doc.EmprestadoCom}} </span>
-                                        <input ng-hide="doc.EmprestadoCom != ''" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Incluir na OS" value="Incluir na OS" data-original-title="Incluir na OS" />
+                                        <span ng-hide="doc.EmprestadoCom == ''">{{doc.EmprestadoCom}} </span>
+                                        <input ng-hide="doc.EmprestadoCom != ''" ng-click="incluirDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Incluir na OS" value="Incluir na OS" data-original-title="Incluir na OS" />
+                                        <input ng-hide="doc.EmprestadoCom == ''" ng-click="devolverDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Devolver Documento" value="Devolver Documento" data-original-title="Devolver Documento" />
                                         <a ng-hide="permissaoFull == true" class="blue ace-icon fa fa-search-plus bigger-140" href="" title="Visualizar"> </a>
                                         <a ng-hide="permissaoFull == true" class="green ace-icon fa fa-pencil bigger-140" href="@urlEditar{{doc.IdDocumento}}" title="Editar"> </a>
                                     </td>

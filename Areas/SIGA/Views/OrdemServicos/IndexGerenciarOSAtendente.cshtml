@@ -7,12 +7,12 @@
 }
 
 @*<p class="widget-title">
-    <a class="btn btn-primary btn-sm" href="@Url.Action("Create")">
-        Criar Novo
-        <i class="ace-icon fa fa-file-o icon-on-right bigger-110">
-        </i>
-    </a>
-</p>*@
+        <a class="btn btn-primary btn-sm" href="@Url.Action("Create")">
+            Criar Novo
+            <i class="ace-icon fa fa-file-o icon-on-right bigger-110">
+            </i>
+        </a>
+    </p>*@
 
 
 @using (Html.BeginForm())
@@ -122,8 +122,14 @@
         case OrdemServico.StatusOrdemServicos.Entregue:
             retorno = "Entregue no Cliente";
             break;
+        case OrdemServico.StatusOrdemServicos.RequisitadaDevolucao:
+            retorno = "Devolução Requisitada";
+            break;
         case OrdemServico.StatusOrdemServicos.EntregueParaMantenedora:
             retorno = "Entregue para Mantenedora";
+            break;
+        case OrdemServico.StatusOrdemServicos.ProcessadaDevolucao:
+            retorno = "Devolução Processada";
             break;
         case OrdemServico.StatusOrdemServicos.Requisitado:
             retorno = "Requisitado";
