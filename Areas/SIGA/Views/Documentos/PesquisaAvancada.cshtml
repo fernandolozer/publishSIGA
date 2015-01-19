@@ -366,8 +366,18 @@
                         <table class="table">
                             <tbody>
                                 <tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width: 80px">Ações</th></tr>
-                                <tr ng-repeat="doc in Documentos">
-                                    <td>{{doc.SequencialDocumentoLote}} </td>
+                                <tr ng-repeat="doc in Documentos" ng-class="doc.CssTelaPesquisa">
+                                    <td>
+                                        <div>
+                                            Caixa = <strong>{{doc.NumeroCaixa}}</strong>
+                                        </div>
+                                        <div>
+                                            Lote = <strong>{{doc.NumeroLote}}</strong>
+                                        </div>
+                                        <div>
+                                            Sequencial = <strong>{{doc.SequencialDocumentoLote}}</strong>
+                                        </div>
+                                    </td>
                                     <td>
                                         <div ng-repeat="desc in doc.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
                                         <br />
@@ -378,13 +388,18 @@
                                         <input ng-hide="doc.EmprestadoCom != ''" ng-click="incluirDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Incluir na OS" value="Incluir na OS" data-original-title="Incluir na OS" />
                                         <input ng-hide="doc.EmprestadoCom == ''" ng-click="devolverDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Devolver Documento" value="Devolver Documento" data-original-title="Devolver Documento" />
                                         <a ng-hide="permissaoFull == true" class="blue ace-icon fa fa-search-plus bigger-140" href="" title="Visualizar"> </a>
-                                        <a ng-hide="permissaoFull == true" class="green ace-icon fa fa-pencil bigger-140" href="@urlEditar{{doc.IdDocumento}}" title="Editar"> </a>
+                                        <a ng-hide="permissaoFull == true" class="green ace-icon fa fa-pencil bigger-140" href="@urlEditar{{doc.IdDocumento}}" target="_blank" title="Editar"> </a>
                                     </td>
                                 </tr>
 
                             </tbody>
                         </table>
 
+                    </div>
+                    <br />
+                    <div class="alert alert-info">                        
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>Atenção!</strong> Pesquisa limitada a 20 documentos. Favor Detalhar o documento nos filtros.
                     </div>
 
                 </div>

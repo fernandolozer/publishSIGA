@@ -19875,3 +19875,12 @@ input.cssusuario {
     background-color: #f0f7fd;
     border-color: #d0e3f0;
 }
+
+.documento-emprestado {
+    background-color : #f1bcb8 !important;
+}
+
+.documento-processado {
+    font-style: italic !important;
+    color: GrayText !important;
+}

@@ -34,7 +34,7 @@
         </div>
         <div>
             <div>
-                <div ng-show="ordemServico != null && ordemServico.StatusOrdemServico != 'ProcessadaDevolucao' " style="padding:10px;">
+                <div ng-show="ordemServico != null " style="padding:10px;">
                     <div class="bs-callout">
                         <div class="row">
                             <div class="col-xs-6 col-sm-4">
@@ -49,10 +49,14 @@
 
                             </div>
                         </div>
-                        <div class="row" ng-show="ordemServico.StatusOrdemServico != 'EntregueParaMantenedora'">
+                        <div ng-show="ordemServico.StatusOrdemServico == 'ProcessadaDevolucao'">
                             <br />
-                            <div class="alert alert-warning" role="alert"><strong>Atenção:</strong> Qualquer motificação nesta ordem de serviço irá alterar o status da mesma para <strong>Entregue Para a Mantenedora</strong></div>
+                            <div class="alert alert-success" role="alert">Ordem de Serviço já processada e todos os documentos entregues.</div>
                         </div>
+                        @*<div class="row" ng-show="ordemServico.StatusOrdemServico != 'EntregueParaMantenedora'">
+                                <br />
+                                <div class="alert alert-warning" role="alert"><strong>Atenção:</strong> Qualquer motificação nesta ordem de serviço irá alterar o status da mesma para <strong>Entregue Para a Mantenedora</strong></div>
+                            </div>*@
                     </div>
                     <br />
                     <h5>Itens da OS</h5>
@@ -60,81 +64,96 @@
                         <thead>
                             <tr>
                                 <th width="10%">Selecionar</th>
-                                <th width="10%">Codigo</th>
+                                <th width="5%">Codigo</th>
                                 <th width="40%">Documento</th>
-                                <th width="20%">Local Origem</th>
+                                <th width="15%">Local Origem</th>
+                                <th width="15%">Local Destino</th>
+                                <th width="15%">OS Empréstimo</th>
                             </tr>
                         </thead>
-                        <tr ng-repeat="itemOS in ordemServico.ListaItens" style="margin: 20px;">
+                        <tr ng-repeat="itemOS in ordemServico.ListaItens" style="margin: 20px;" ng-class="itemOS.CssClass">
                             <td>
-                                <input type="checkbox" ng-model="itemOS.Selected" />
+                                <input ng-show="itemOS.ProcessadaDevolucao == false" type="checkbox" ng-model="itemOS.Selected" />
+                                <span ng-show="itemOS.ProcessadaDevolucao == true">Devolvido </span>
                             </td>
                             <td>
                                 <span>{{itemOS.IdItemOrdemServico}}</span>
                             </td>
                             <td>
-                                <div ng-repeat="desc in itemOS.Documento.Descritores">
+                                <div ng-repeat="desc in itemOS.Documento.Descritores" ng-class="itemOS.CssClass">
                                     <span>{{desc.NomeDescritor}}</span> - <strong>{{desc.ValorDescritor}}</strong>
                                 </div>
                             </td>
                             <td>
                                 <div>
-                                    Caixa = <strong>{{itemOS.Documento.NumeroCaixa}}</strong>
+                                    Caixa = <strong>{{itemOS.NumeroCaixaOrigem}}</strong>
                                 </div>
                                 <div>
-                                    Lote = <strong>{{itemOS.Documento.NumeroLote}}</strong>
+                                    Lote = <strong>{{itemOS.NumeroLoteOrigem}}</strong>
                                 </div>
                                 <div>
                                     Sequencial = <strong>{{itemOS.Documento.SequencialDocumentoLote}}</strong>
                                 </div>
                             </td>
+                            <td>
+                                <div ng-show="itemOS.ProcessadaDevolucao == true">
+                                    Caixa = <strong>{{itemOS.NumeroCaixaDestino}}</strong>
+                                </div>
+                                <div ng-show="itemOS.ProcessadaDevolucao == true">
+                                    Lote = <strong>{{itemOS.NumeroLoteDestino}}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                {{itemOS.DetalheOsEmprestimo}}
+                            </td>
                         </tr>
                     </table>
 
                     <hr />
-                    <div class="row">
-                        <div class="col-sm-12 col-mg-12 col-lg-12">
-                            <h5>Selecione o Destino dos documentos</h5>
-                            <select ng-model="modoDestino">
-                                <option value="0" selected>[ SELECIONE ]</option>
-                                <option value="1">Caixa Original dos Documentos</option>
-                                <option value="2">Nova Caixa / Lote</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div ng-show="modoDestino == 2">
+                    <div ng-show="ordemServico.StatusOrdemServico != 'ProcessadaDevolucao'">
                         <div class="row">
-                            <div class="col-mg-4 col-sm-4 col-lg-4">
-                                <span class="control-label">Informe a Caixa</span>
-                                <input class="form-control" type="text" ng-model="CaixaSelecionada" ng-change="loadLotes()" />
-                            </div>
-                            <div class="col-mg-4 col-sm-4 col-lg-4">
-                                <span class="control-label">Selecione o Lote</span>
-                                <select class="form-control" ng-model="LoteSelecionado" ng-options="k as v for (k, v) in Lotes">
-                                    <option value="">[ Selecione ]</option>
+                            <div class="col-sm-12 col-mg-12 col-lg-12">
+                                <h5>Selecione o Destino dos documentos</h5>
+                                <select ng-model="modoDestino">
+                                    <option value="0" selected>[ SELECIONE ]</option>
+                                    <option value="1">Caixa Original dos Documentos</option>
+                                    <option value="2">Nova Caixa / Lote</option>
                                 </select>
                             </div>
-                            <div class="col-mg-4 col-sm-4 col-lg-4">
-                                <input id="btnNovoLote" type="button" ng-click="novoLote()" value="Novo Lote" class="btn btn-primary" />
-                                <input id="btnNovaCaixa" type="button" ng-click="novaCaixa()" value="Nova Caixa" class="btn btn-primary" />
+                        </div>
+                        <div ng-show="modoDestino == 2">
+                            <div class="row">
+                                <div class="col-mg-4 col-sm-4 col-lg-4">
+                                    <span class="control-label">Informe a Caixa</span>
+                                    <input class="form-control" type="text" ng-model="CaixaSelecionada" ng-change="loadLotes()" />
+                                </div>
+                                <div class="col-mg-4 col-sm-4 col-lg-4">
+                                    <span class="control-label">Selecione o Lote</span>
+                                    <select class="form-control" ng-model="LoteSelecionado" ng-options="k as v for (k, v) in Lotes">
+                                        <option value="">[ Selecione ]</option>
+                                    </select>
+                                </div>
+                                <div class="col-mg-4 col-sm-4 col-lg-4">
+                                    <input id="btnNovoLote" type="button" ng-click="novoLote()" value="Novo Lote" class="btn btn-primary" />
+                                    <input id="btnNovaCaixa" type="button" ng-click="novaCaixa()" value="Nova Caixa" class="btn btn-primary" />
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row" ng-show="erroCaixa != null && erroCaixa != '' ">
+                                <div class="alert alert-danger" role="alert">{{erroCaixa}}</div>
                             </div>
                         </div>
                         <br />
-                        <div class="row" ng-show="erroCaixa != null && erroCaixa != '' ">
-                            <div class="alert alert-danger" role="alert">{{erroCaixa}}</div>
+                        <div class="row right" style="align-items:flex-end; ">
+                            <input ng-show="modoDestino != 0" type="button" value="Confirmar" ng-click="processarDevolucao()" class="btn btn-primary" />
                         </div>
                     </div>
-                    <br />
-                    <div class="row right" style="align-items:flex-end; ">
-                        <input ng-show="modoDestino != 0" type="button" value="Confirmar" ng-click="processarDevolucao()" class="btn btn-primary" />
-                    </div>
-                </div>
+                </div> @*if os != null*@
                 <div ng-show="erroBusca == 1">
                     <div class="alert alert-warning" role="alert">Ordem de Serviço de Devolução não encontrada. Verifique o Numero informado</div>
                 </div>
-                <div ng-show="ordemServico.StatusOrdemServico == 'ProcessadaDevolucao'">
-                    <div class="alert alert-success" role="alert">Ordem de Serviço já processada e todos os documentos entregues.</div>
-                </div>
+
+
             </div>
         </div>
     </div>
@@ -207,7 +226,7 @@
         };
 
         $scope.novaCaixa = function () {
-            $scope.erroCaixa = '';            
+            $scope.erroCaixa = '';
             $http({
                 method: 'POST',
                 url: '@urlNovaCaixa',

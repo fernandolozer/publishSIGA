@@ -3,21 +3,26 @@
 <head>
 	<meta charset="UTF-8">
 	<title>OS</title>
-
 </head>
 <body>
 
-	<div class="container">
+	<div class="container" style="padding-left : 30px; padding-right: 30px;">
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="row invoice-title">
-					<h2 class="pull-left">Ordem de Serviço</h2>
+					<div class="row">
+						<h2 class="pull-left">[%LOGO_MANTENEDORA%] [%NOME_MANTENEDORA%]</h2>
 
-					<h6 class="pull-right" align="center">
-						[%CODIGO_BARRAS_OS%]
-						<br>
-						[%NUMERO_OS%]
-					</h6>
+
+						<h6 class="pull-right" align="center">
+							[%CODIGO_BARRAS_OS%]
+							<br>
+							[%NUMERO_OS%]
+						</h6>
+					</div>
+					<div class="row">
+						<h2 class="pull-left">Ordem de Serviço de [%TIPO_OS%]</h2>
+					</div>
 					<br>
 
 				</div>
@@ -30,6 +35,7 @@
 							[%NOME_SETOR%]<br>
 							[%ENDERECO_CLIENTE%]<br>
 							[%REQUERENTE_CLIENTE%]
+							Pedido em [%DATA_HORA_REQUISITADO%]
 						</address>
 					</div>    			
 				</div>    		
@@ -50,6 +56,7 @@
 										<td></td>
 										<td>Sequencial</td>
 										<td><strong>Item</strong></td>        							
+										<td class="text-left"><strong>Local</strong></td>
 										<td class="text-left"><strong>Observação</strong></td>
 										<td class="text-left"><strong>Anotações</strong></td>
 									</tr>
