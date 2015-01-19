@@ -1,0 +1,371 @@
+﻿@using GridMvc.Html
+@using SIGA.Entities.Models
+
+@model IEnumerable<SIGA.Entities.Models.Documento>
+
+@{
+    ViewBag.Title = "Documento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var idCliente = ViewData["IdCliente"];
+    var idsetor = ViewData["IdSetor"];
+    var idTemporalidade = ViewData["IdTemporalidade"];
+
+    List<Documento> listaDocumentos = ViewBag.ListaDocumentos as List<Documento>;
+
+    var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    var urlDescritores = Url.Content("~/SIGA/Documentos/CarregaDescritoresTipoDocumento");
+    var urlMantenedoras = Url.Content("~/SIGA/Documentos/GetTodasMantenedoras");
+    var urlClientes = Url.Content("~/SIGA/Documentos/GetClientesMantenedora");
+
+    var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
+
+    var urlTipoDoc = Url.Content("~/SIGA/Documentos/CarregaListaTiposDocumentosSetor");
+    var urlListaDocumento = Url.Content("~/SIGA/Documentos/ListaDocumentos");
+    var urlPesquisaFernando = Url.Content("~/SIGA/Documentos/PesquisaFernando");
+    var urlIncluirOS = Url.Content("~/SIGA/Documentos/IncluirNaOS");
+    var urlDevolverOS = Url.Content("~/SIGA/Documentos/DevolverOS");
+    var urlEditar = Url.Content("~/SIGA/Documentos/Edit/");
+
+    var urlCaixaManual = Url.Content("~/SIGA/Documentos/GetInfoCaixa");
+    
+
+    int ClienteSelecionado = ViewData["ClienteSelecionado"] == null ? 0 : (int)ViewData["ClienteSelecionado"];
+    int SetorSelecionado = ViewData["SetorSelecionado"] == null ? 0 : (int)ViewData["SetorSelecionado"];
+    int TipoDocumentoSelecionado = ViewData["TipoDocumentoSelecionado"] == null ? 0 : (int)ViewData["TipoDocumentoSelecionado"];
+    Dictionary<string, string> DescritoresPReenchidos = ViewData["DescritoresPreenchidos"] as Dictionary<string, string>;
+
+    var boolPesquisaAvancada = ViewBag.Avancada;
+}
+
+<script src="~/Content/js/documentos.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+    function MontarListaDescritores(data) {
+        $('#divDescritores').html('');
+        var classPrimeiro = 'primeiroDescritor';
+        tabela = '<div class="panel panel-default"><table class="table"><tbody><tr><th>Nome do Descritor</th><th>Valor</th></tr>';
+        $.each(data, function () {
+            tabela = tabela + '<tr><td class="col-xs-6 col-sm-4">'
+            tabela = tabela + ' <input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="' + this.NomeDescritor + '">';
+            tabela = tabela + '</td><td>';
+            var valor = ''
+            if (this.ValorDescritor != null) {
+                valor = this.ValorDescritor;
+            }
+            var classTipoDescritor = '';
+            if (this.TipoDescritor == 4) {
+                classTipoDescritor = ' onkeypress="javascript: mascara(this, cnpj_mask);" maxlength="18" ';
+            }
+            if (this.TipoDescritor == 5) {
+                classTipoDescritor = ' onkeypress="javascript: mascara(this, cpf_mask);" maxlength="14" ';
+            }
+            var strTamanhoMaximo = '';
+            if (this.TamanhoMaximo > 0) {
+                strTamanhoMaximo = ' maxlength="' + this.TamanhoMaximo + '" ';
+            }
+            tabela = tabela + '<input class="' + classPrimeiro +
+                ' form-control text-box single-line descritor" data-val="true" id="' + this.idDescritor +
+                '" name="' + this.idDescritor + '" type="text" value="' + this.ValorDescritor + '" ' + classTipoDescritor + strTamanhoMaximo + ' >';
+            tabela = tabela + ' </td></tr>';
+            classPrimeiro = '';
+        });
+
+        tabela = tabela + '</tbody></table></div>';
+        $(tabela).appendTo('#divDescritores');
+    };
+
+    var PesquisaController = function ($scope, $http) {
+        // inicializa a variavel com todas as mantenedoras
+        $scope.init = function () {
+
+            $scope.permissaoFull = '@permissaoFull';
+
+            $scope.Clientes = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@urlMantenedoras',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Mantenedoras = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Mantenedoras = null;
+            });
+
+        };
+
+        $scope.loadClientes = function () {
+            $scope.Setores = null;
+            $scope.TiposDocumento = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@urlClientes',
+                data: { idMantenedora: $scope.MantenedoraSelecionada },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Clientes = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Clientes = null;
+            });
+        };
+
+        $scope.loadSetores = function () {
+            $scope.TiposDocumento = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@url',
+                data: { idCliente: $scope.ClienteSelecionado },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Setores = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Setores = null;
+            });
+        };
+
+       
+        $scope.pesquisaDocumentos = function () {
+            $scope.Documentos = null;
+            
+            $http({
+                method: 'POST',
+                url: '@urlListaDocumento',
+                data: {
+                    idCliente: $scope.ClienteSelecionado,
+                    idSetor: $scope.SetorSelecionado,
+                    idLote: $scope.LoteSelecionado
+                },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                console.log('entrou sucesso');
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Documentos = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Documentos = null;
+                console.log(data);
+            });
+        };
+
+        $scope.loadLotes = function () {
+            $http({
+                method: 'POST',
+                url: '@urlCaixaManual',
+                data: { idCliente: $scope.ClienteSelecionado, NumeroCaixa: $scope.CaixaSelecionada },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                console.log(data);
+                $scope.Lotes = data;
+
+            }).error(function (data) {
+                $scope.Lotes = null;
+
+            });
+        };
+
+
+    }
+
+    // controle do modal
+    angular.module('ui.bootstrap.demo').controller('ModalDemoCtrl', function ($scope, $modal, $log) {
+
+        $scope.items = ['item1', 'item2', 'item3'];
+
+        $scope.open = function (size) {
+
+            var modalInstance = $modal.open({
+                templateUrl: 'myModalContent.html',
+                controller: 'ModalInstanceCtrl',
+                size: size,
+                resolve: {
+                    items: function () {
+                        return $scope.items;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                $scope.selected = selectedItem;
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        };
+    });
+
+    // Please note that $modalInstance represents a modal window (instance) dependency.
+    // It is not the same as the $modal service used above.
+
+    angular.module('ui.bootstrap.demo').controller('ModalInstanceCtrl', function ($scope, $modalInstance, items) {
+
+        $scope.items = items;
+        $scope.selected = {
+            item: $scope.items[0]
+        };
+
+        $scope.ok = function () {
+            $modalInstance.close($scope.selected.item);
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
+    });
+
+</script>
+
+@using (Html.BeginForm())
+{
+    <div class="widget-box" ng-controller="PesquisaController">
+        <div class="widget-header">
+            <h4 class="widget-title">Pesquisa Avançada de Documentos</h4>
+        </div>
+        <div class="widget-body">
+            <div class="widget-main">
+                <div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-4">
+                            <label class="control-label">Mantenedora</label>
+                            <select class="form-control" ng-init="init()" ng-change="loadClientes()" ng-model="MantenedoraSelecionada" ng-options="item.IdMantenedora as item.NomeMantenedora for item in Mantenedoras">
+                                <option value="">[ Selecione ]</option>
+                            </select>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-4">
+                            <label class="control-label">Cliente</label>
+                            <select class="form-control" ng-disabled="Clientes == null" ng-change="loadSetores()" ng-model="ClienteSelecionado" ng-options="item.IdCliente as item.NomeCliente for item in Clientes">
+                                <option value="">[ Selecione ]</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-12 col-sm-4">
+                            <label class="control-label">Setor</label>
+                            <select class="form-control" ng-disabled="Setores == null" ng-model="SetorSelecionado" ng-options="item.IdSetor as item.NomeSetor for item in Setores">
+                                <option value="">[ Selecione ]</option>
+                            </select>
+                        </div>
+                       
+                    </div>
+                    <div class="row">
+                        <div class="col-mg-4 col-sm-4 col-lg-4">
+                            <span class="control-label">Informe a Caixa</span>
+                            <input class="form-control" type="text" ng-model="CaixaSelecionada" ng-change="loadLotes()" />
+                        </div>
+                        <div class="col-mg-4 col-sm-4 col-lg-4">
+                            <span class="control-label">Selecione o Lote</span>
+                            <select class="form-control" ng-model="LoteSelecionado" ng-options="k as v for (k, v) in Lotes">
+                                <option value="">[ Selecione ]</option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <br />
+                    <div id="divDescritores" ng-hide="Descritores == null">
+
+                    </div>
+                    <br />
+                    <div class="row right">
+                        <div class="col-xs-6 col-sm-12">
+                            <input type="button" id="btnPesquisaAvancada" ng-click="pesquisaDocumentos()" value="Listar" class="btn btn-primary" />
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-12" id="replacetarget">
+                <div ng-hide="Documentos == null" class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>Resultado da Pesquisa</strong>
+                    </div>
+                    <div id="divDocumentos">
+                        <table class="table">
+                            <tbody>
+                                <tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width: 80px">Ações</th></tr>
+                                <tr ng-repeat="doc in Documentos" ng-class="doc.CssTelaPesquisa">
+                                    <td>
+                                        <div>
+                                            Caixa = <strong>{{doc.NumeroCaixa}}</strong>
+                                        </div>
+                                        <div>
+                                            Lote = <strong>{{doc.NumeroLote}}</strong>
+                                        </div>
+                                        <div>
+                                            Sequencial = <strong>{{doc.SequencialDocumentoLote}}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div ng-repeat="desc in doc.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
+                                        <br />
+                                    </td>
+                                    <td>{{doc.DescricaoTipoDocumento}} </td>
+                                    <td style="white-space: nowrap;" class="grid-cell action-buttons">
+                                        @*<span ng-hide="doc.EmprestadoCom == ''">{{doc.EmprestadoCom}} </span>
+                                        <input ng-hide="doc.EmprestadoCom != ''" ng-click="incluirDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Incluir na OS" value="Incluir na OS" data-original-title="Incluir na OS" />
+                                        <input ng-hide="doc.EmprestadoCom == ''" ng-click="devolverDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Devolver Documento" value="Devolver Documento" data-original-title="Devolver Documento" />*@
+                                        
+                                        <a ng-hide="permissaoFull == true" class="blue ace-icon fa fa-search-plus bigger-140" href="" title="Visualizar"> </a>
+                                        <a ng-hide="permissaoFull == true" class="green ace-icon fa fa-pencil bigger-140" href="@urlEditar{{doc.IdDocumento}}" target="_blank" title="Editar"> </a>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <br />
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div ng-controller="ModalDemoCtrl">
+        <script type="text/ng-template" id="myModalContent.html">
+            <div class="modal-header">
+                <h3 class="modal-title">I'm a modal!</h3>
+            </div>
+            <div class="modal-body">
+                <ul>
+                    <li ng-repeat="item in items">
+                        <a ng-click="selected.item = item">{{ item }}</a>
+                    </li>
+                </ul>
+                Selected: <b>{{ selected.item }}</b>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" ng-click="ok()">OK</button>
+                <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+            </div>
+        </script>
+    </div>
+
+}
