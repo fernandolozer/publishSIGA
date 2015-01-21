@@ -4,6 +4,8 @@
     ViewBag.Title = "Temporalidade";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    var urlMantenedora = Url.Content("~/SIGA/Clientes/CarregaListaDeCliente");
+}
 }
 
 <script type="text/javascript">
@@ -73,6 +75,28 @@
                 }
             });
         });
+
+        $("#idMantenedora").change(function () {
+            var elements = "";
+            if ($(this).val() == '') {
+                elements = '<option value="">[ Selecione ]</option>';
+                $('#idClienteTipoDocumento').empty().attr('readonly', true).append(elements);
+                return;
+            }
+            $.ajax({
+                url: '@urlMantenedora',
+                type: 'POST',
+                data: { idMantenedora: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    elements = '<option value="">[ Selecione ]</option>';
+                    $.each(data, function () {
+                        elements = elements + '<option value="' + this.IdCliente + '">' + this.NomeCliente + '</option>';
+                    });
+                    $('#idClienteTipoDocumento').empty().attr('readonly', false).append(elements);
+                }
+            });
+        });
     });
 
 </script>
@@ -86,11 +110,19 @@
         <h4>Temporalidade</h4>
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        
+        <div class="form-group">
+            @Html.LabelFor(model => model.Setor.Cliente.IdMantenedora, "Mantenedora", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("IdMantenedora", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idMantenedora" })
+                @Html.ValidationMessageFor(model => model.Setor.Cliente.IdMantenedora, "", new { @class = "text-danger" })
+            </div>
+        </div>
 
         <div class="form-group">
             @Html.LabelFor(model => model.Setor.Cliente.IdCliente, "Cliente", htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("IdCliente", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento" })
+                @Html.DropDownList("IdCliente", null, "[ Selecione ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento", @readonly = "readonly" })
                 @Html.ValidationMessageFor(model => model.Setor.Cliente.IdCliente, "", new { @class = "text-danger" })
             </div>
         </div>

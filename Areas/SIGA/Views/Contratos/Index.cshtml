@@ -31,16 +31,27 @@
                 @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
                     {
                         g.Add(n => n.Cliente.NomeCliente).Titled("Cliente");
+                        g.Add(n => n.NumeroContrato).Titled("Número do Contrato");
+                        g.Add(n => n.NumeroEdital).Titled("Número do Edital");
+                        g.Add(n => n.NumeroProcesso).Titled("Número do Processo");
                         g.Add()
                             .Css("action-buttons")
-                            .SetWidth(100)
+                            .SetWidth(120)
                             .Titled("Ação")
                             .Encoded(false)
                             .Sanitized(false)
                             .RenderValueAs(p =>
+                                p.ImagemContrato == null
+                                ?
                                 @Html.ActionLink(" ", "Details", new { id = p.IdContrato }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
                                 @Html.ActionLink(" ", "Edit", new { id = p.IdContrato }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
-                                @Html.ActionLink(" ", "Delete", new { id = p.IdContrato }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString());
+                                @Html.ActionLink(" ", "Delete", new { id = p.IdContrato }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString()
+                                :
+                                @Html.ActionLink(" ", "Details", new { id = p.IdContrato }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Edit", new { id = p.IdContrato }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Delete", new { id = p.IdContrato }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString() +
+                                @Html.ActionLink(" ", "Arquivo", new { id = p.IdContrato }, new { @class = "blue ace-icon fa fa-file-text-o bigger-140", @title = "Visualizar Arquivo", @data_rel = "tooltip" }).ToHtmlString());
+
                     }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
             </div>
         </div>
