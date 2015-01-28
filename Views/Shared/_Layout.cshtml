@@ -135,7 +135,7 @@
 
                         <ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
                             <li>
-                                <a href="@Url.Action("EmConstrucao", "Util", new { area = "SIGA" })">
+                                <a href="@Url.Action("ConfigurarUsuario", "Usuarios", new { area = "SIGA", id = User.Identity.GetUserId() })">
                                     <i class="ace-icon fa fa-cog"></i>
                                     Configuração
                                 </a>
@@ -271,7 +271,7 @@
                     </li>
                 }
 
-                @if (User.IsInRole("Administrador") || User.IsInRole("Funcionário"))
+                @if (User.IsInRole("Administrador"))
                 {
                     <li class="hsub hover">
                         <a href="#" class="dropdown-toggle">
@@ -578,6 +578,14 @@
                                 <b class="arrow"></b>
                             </li>
 
+                            <li class="hover">
+                                <a href="@Url.Action("Index", "Historicos", new { area = "SIGA" })">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                    Histórico
+                                </a>
+
+                                <b class="arrow"></b>
+                            </li>
 
                             @*<li class="hover">
                                 <a href="@Url.Action("Index", "Grupos", new { area = "SIGA" })">

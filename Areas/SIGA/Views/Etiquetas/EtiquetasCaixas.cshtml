@@ -6,7 +6,7 @@
     var urlGerarEtiquetas = Url.Content("~/SIGA/Etiquetas/GerarEtiquetasCaixas");
     var idCliente = ViewData["IdCliente"];
     var idsetor = ViewData["IdSetor"];
-    var idTemporalidade = ViewData["IdTemporalidade"];    
+    var idTemporalidade = ViewData["IdTemporalidade"];
 }
 <script type="text/javascript">
 
@@ -65,7 +65,7 @@
                 type: 'POST',
                 data: {
                     idCliente: varidCliente, idSetor: varidSetor,
-                    CaixaInicial : varCaixaIni, CaixaFinal : varCaixaFim
+                    CaixaInicial: varCaixaIni, CaixaFinal: varCaixaFim
                 },
                 datatype: 'json',
                 success: function (response, status, request) {
@@ -93,7 +93,7 @@
                     <div class="row">
                         <div class="col-xs-6 col-sm-4">
                             <label class="control-label">Cliente</label>
-                            @Html.DropDownListFor(p => p.idCliente, (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new {@id="IdClienteTipoDocumento",  @class = "form-control" })
+                            @Html.DropDownListFor(p => p.idCliente, (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new { @id = "IdClienteTipoDocumento", @class = "form-control" })
                         </div>
                         <div class="col-xs-6 col-sm-4">
                             <label class="control-label">Setor</label>
@@ -101,13 +101,13 @@
 
                         </div>
                         <div class="col-xs-6 col-sm-4">
-                            
+
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-xs-6 col-sm-4">
                             <label class="control-label">Caixa Inicial</label>
-                            @Html.TextBoxFor(p => p.CaixaInicial, new { @class = "form-control" })                            
+                            @Html.TextBoxFor(p => p.CaixaInicial, new { @class = "form-control" })
                         </div>
                         <div class="col-xs-6 col-sm-4">
                             <label class="control-label">Caixa Final</label>
@@ -117,12 +117,27 @@
 
                         </div>
                     </div>
-                    
+                    <br />
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-8">
+                            <div class="panel panel-default" >
+
+                                <div class="panel-body">
+                                    @Html.CheckBoxFor(p => p.CriarCaixas)
+                                    <span>Criar Caixas?</span>
+                                    <div class="alert alert-info">
+                                        <span>Opção usada para criar as caixas no momento da impressão das etiquetas.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <br />
                     <div class="row right">
                         <div class="col-xs-6 col-sm-12">
                             <input type="submit" id="btnGerarEtiquetas" value="Gerar Etiquetas" class="btn btn-primary" />
-                            
+
                         </div>
                     </div>
                 </div>
@@ -131,6 +146,6 @@
 
 
         </div>
-       
+
     </div>
 }

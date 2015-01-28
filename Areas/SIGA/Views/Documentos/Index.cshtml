@@ -85,15 +85,71 @@
                 </div>
             </div>
 
-            @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
+            @if (User.IsInRole("Digitador"))
+            {
+                @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
                     {
-                        g.Add(n => n.Cliente.NomeCliente).SetWidth(230).Titled("Cliente");
-                        g.Add(n => n.Setor.NomeSetor).SetWidth(180).Titled("Setor");
-                        g.Add(n => n.Lote.NumeroLote).SetWidth(140).Titled("Número Lote");
-                        g.Add(n => n.Lote.Caixa.NomeCaixa).SetWidth(250).Titled("Nome da Caixa");
+                        g.Add(n => n.Cliente.NomeCliente).SetWidth(150).Titled("Cliente");
+                        g.Add(n => n.Setor.NomeSetor).SetWidth(120).Titled("Setor");
+                        g.Add(n => n.Lote.NumeroLote).SetWidth(90).Titled("Núm. Lote");
+                        g.Add(n => n.Lote.Caixa.NomeCaixa).SetWidth(120).Titled("Nome da Caixa");
                         g.Add(n => n.DescricaoDocumento).Titled("Descrição");
                         //g.Add(n => n.Disponivel).Titled("Disponível?").RenderValueAs(u => RetornaNomeStatus(u)).Encoded(false);
-                        g.Add(n => n.Disponivel).Titled("Disponível?").Encoded(false).Sanitized(false).RenderValueAs(u =>
+                        g.Add(n => n.Disponivel).Titled("Disponível").Encoded(false).Sanitized(false).RenderValueAs(u =>
+                            u.Disponivel == false
+                        ?
+                        @Html.ActionLink("Não", "VerificaDisponibilidadeDocumento", new { id = u.IdDocumento }, new { @title = "Verificar Histórico", @data_rel = "tooltip" }).ToHtmlString()
+                        :
+                        "Sim");
+
+                        if (User.IsInRole("Administrador") || User.IsInRole("Funcionário"))
+                        {
+                            g.Add()
+                                .Css("action-buttons")
+                                .SetWidth(120)
+                                .Titled("Ação")
+                                .Encoded(false)
+                                .Sanitized(false)
+                                .RenderValueAs(p =>
+                                    p.Disponivel
+                                    ?
+                                    @Html.ActionLink(" ", "IncluirNaOS", new { id = p.IdDocumento }, new { @class = "red ace-icon fa  fa-shopping-cart bigger-140", @title = "Incluir na OS", @data_rel = "tooltip" }).ToHtmlString() +
+                                    @Html.ActionLink(" ", "Details", new { id = p.IdDocumento }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                    @Html.ActionLink(" ", "Edit", new { id = p.IdDocumento }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString()
+                                    :
+                                    @Html.ActionLink(" ", "Details", new { id = p.IdDocumento }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
+                                    @Html.ActionLink(" ", "Edit", new { id = p.IdDocumento }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString());
+                        }
+                        else
+                        {
+
+                            g.Add()
+                                 .Css("action-buttons")
+                                 .SetWidth(80)
+                                 .Titled("Ação")
+                                 .Encoded(false)
+                                 .Sanitized(false)
+                                 .RenderValueAs(p =>
+                                     p.Disponivel
+                                     ?
+                                     @Html.ActionLink(" ", "IncluirNaOS", new { id = p.IdDocumento }, new { @class = "red ace-icon fa  fa-shopping-cart bigger-140", @title = "Incluir na OS", @data_rel = "tooltip" }).ToHtmlString()
+                                     :
+                                     null);
+                        }
+                    }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+
+            }
+            else
+            {
+                @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
+                    {
+                        g.Add(n => n.Cliente.NomeCliente).SetWidth(150).Titled("Cliente");
+                        g.Add(n => n.Setor.NomeSetor).SetWidth(120).Titled("Setor");
+                        g.Add(n => n.Lote.NumeroLote).SetWidth(90).Titled("Núm. Lote");
+                        g.Add(n => n.Lote.Caixa.NomeCaixa).SetWidth(120).Titled("Nome da Caixa");
+                        g.Add(n => n.DescricaoDocumento).Titled("Descrição");
+                        //g.Add(n => n.Disponivel).Titled("Disponível?").RenderValueAs(u => RetornaNomeStatus(u)).Encoded(false);
+                        g.Add(n => n.Disponivel).Titled("Disponível").Encoded(false).Sanitized(false).RenderValueAs(u =>
                             u.Disponivel == false
                         ?
                         @Html.ActionLink("Não", "VerificaDisponibilidadeDocumento", new { id = u.IdDocumento }, new { @title = "Verificar Histórico", @data_rel = "tooltip" }).ToHtmlString()
@@ -137,6 +193,7 @@
                                      null);
                         }
                     }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+            }
 
             @helper RetornaNomeStatus(Documento documento)
 {

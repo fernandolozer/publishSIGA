@@ -19,6 +19,7 @@
     var urlValidarItensTela = Url.Content("~/SIGA/Documentos/ValidacaoItensTela");
     var urlSalvarCodigoBarras = Url.Content("~/SIGA/Documentos/SalvarCodigoDeBarras");
     var urlObtemCodigoBarras = Url.Content("~/SIGA/Documentos/ObtemCodigoBarras");
+    var urlUploadAnexo = Url.Content("~/SIGA/Documentos/AdicionarAnexoDocumento");
     var idCliente = ViewData["IdCliente"];
     var idsetor = ViewData["IdSetor"];
     var idTemporalidade = ViewData["IdTemporalidade"];
@@ -161,6 +162,10 @@
                 tabela = tabela + ' </td></tr>';
                 classPrimeiro = '';
             });
+            tabela = tabela + '<tr><td class="col-xs-6 col-sm-4"><input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="Anexo"></td>';
+            tabela = tabela + '<td> <input type="file" name="UploadFile" id="txtUploadFile" /> </td>';
+            tabela = tabela + '</tr>';
+
 
             tabela = tabela + '</tbody></table></div>';
             $(tabela).appendTo('#divDescritores');
@@ -355,8 +360,31 @@
             });
         }
 
+        function EfetuarUploadAnexo(idDocumento) {
+
+            var formData = new FormData($("#txtUploadFile")[0]);
+
+            $.ajax({
+                url: "@urlUploadAnexo",
+                type: 'POST',
+                data: { 
+                    IdDocumento : idDocumento,
+                    fileUpload : formData
+                },
+                async: false,
+                success: function (data) {
+                    //alert(data)
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+
+        }
+
         // para inserir documentos
         function SalvaDocumento() {
+            console.log('Inicio SAlvar Documento');
             EsconderMensagemErro();
             var varidCliente = $("#IdClienteTipoDocumento").val();
             var varIdDocumento = $("#idDocumentoEmEdicao").val();
@@ -382,8 +410,11 @@
                 },
                 datatype: 'json',
                 success: function (data) {
+
+                    EfetuarUploadAnexo(data.Id);
+
                     // montar a lista de todos documentos no mesmo lote.
-                    PreencheDocumentosDoLote(data);
+                    PreencheDocumentosDoLote(data.Dados);
                     // limpar os campos de texto.
                     for (var i = 0; i < listaImputs.length; i++) {
                         listaImputs[i].value = '';
@@ -811,6 +842,7 @@
                 <div id="divDescritores">
 
                 </div>
+
             </div>
         </div>
 

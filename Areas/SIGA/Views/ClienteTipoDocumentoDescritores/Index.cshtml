@@ -18,6 +18,9 @@
                 @Html.DisplayNameFor(model => model.Ordem)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Requerido)
+            </th>
+            <th>
                 @Html.NoEncodeActionLink("<span class='glyphicon glyphicon-plus'></span> Novo", "Add", "Create", "ClienteTipoDocumentoDescritores", routeValues: new { IdClienteTipoDocumento = ViewBag.IdClienteTipoDocumento }, htmlAttributes: new { data_modal = "", @class = "btn btn-xs btn-primary pull-right" })
             </th>
         </tr>
@@ -30,6 +33,9 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Ordem)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Requerido)
                 </td>
                 <td>
                     <div class="pull-right">
