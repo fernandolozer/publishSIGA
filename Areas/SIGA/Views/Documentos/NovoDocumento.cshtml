@@ -163,7 +163,7 @@
                 classPrimeiro = '';
             });
             tabela = tabela + '<tr><td class="col-xs-6 col-sm-4"><input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="Anexo"></td>';
-            tabela = tabela + '<td> <input type="file" name="UploadFile" id="txtUploadFile" /> </td>';
+            tabela = tabela + '<td> <input type="file" tabIndex="-1" name="UploadFile" id="txtUploadFile" /> </td>';
             tabela = tabela + '</tr>';
 
 
@@ -363,7 +363,9 @@
         function EfetuarUploadAnexo(idDocumento) {
 
             var formData = new FormData($("#txtUploadFile")[0]);
-
+            console.log('-------- log do arquivo anexo --------');
+            console.log(formData);
+            console.log('-------- Fim log do arquivo anexo --------');
             $.ajax({
                 url: "@urlUploadAnexo",
                 type: 'POST',
@@ -371,9 +373,13 @@
                     IdDocumento : idDocumento,
                     fileUpload : formData
                 },
-                async: false,
+                async: true,
                 success: function (data) {
-                    //alert(data)
+                    alert("upload ok. ");
+
+                },
+                error: function(){
+                    alert("Erro ao fazer upload do arquivo. ");
                 },
                 cache: false,
                 contentType: false,
