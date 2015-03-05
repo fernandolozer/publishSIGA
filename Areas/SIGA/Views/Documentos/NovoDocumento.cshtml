@@ -162,8 +162,8 @@
                 tabela = tabela + ' </td></tr>';
                 classPrimeiro = '';
             });
-            tabela = tabela + '<tr><td class="col-xs-6 col-sm-4"><input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="Anexo"></td>';
-            tabela = tabela + '<td> <input type="file" tabIndex="-1" name="UploadFile" id="txtUploadFile" /> </td>';
+            //tabela = tabela + '<tr><td class="col-xs-6 col-sm-4"><input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="Anexo"></td>';
+            //tabela = tabela + '<td> <input type="file" tabIndex="-1" name="UploadFile" id="txtUploadFile" /> </td>';
             tabela = tabela + '</tr>';
 
 
@@ -417,7 +417,7 @@
                 datatype: 'json',
                 success: function (data) {
 
-                    EfetuarUploadAnexo(data.Id);
+                   // EfetuarUploadAnexo(data.Id);
 
                     // montar a lista de todos documentos no mesmo lote.
                     PreencheDocumentosDoLote(data.Dados);
