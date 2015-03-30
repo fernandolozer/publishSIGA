@@ -26,6 +26,7 @@
     var urlIncluirOS = Url.Content("~/SIGA/Documentos/IncluirNaOS");
     var urlDevolverOS = Url.Content("~/SIGA/Documentos/DevolverOS");
     var urlEditar = Url.Content("~/SIGA/Documentos/Edit/");
+    var urlDonwloadFile = Url.Content("~/SIGA/Documentos/DownloadFile");
 
 
     int ClienteSelecionado = ViewData["ClienteSelecionado"] == null ? 0 : (int)ViewData["ClienteSelecionado"];
@@ -389,6 +390,7 @@
                                         <input ng-hide="doc.EmprestadoCom == ''" ng-click="devolverDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Devolver Documento" value="Devolver Documento" data-original-title="Devolver Documento" />
                                         <a ng-hide="permissaoFull == true" class="blue ace-icon fa fa-search-plus bigger-140" href="" title="Visualizar"> </a>
                                         <a ng-hide="permissaoFull == true" class="green ace-icon fa fa-pencil bigger-140" href="@urlEditar{{doc.IdDocumento}}" target="_blank" title="Editar"> </a>
+                                        <a ng-hide="doc.TemAnexo == false" class="red ace-icon fa fa-paperclip bigger-140" href="@urlDonwloadFile/{{doc.IdDocumento}}" target="_blank" title="Anexo"> </a>
                                     </td>
                                 </tr>
 

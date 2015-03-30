@@ -19,7 +19,8 @@
     var urlValidarItensTela = Url.Content("~/SIGA/Documentos/ValidacaoItensTela");
     var urlSalvarCodigoBarras = Url.Content("~/SIGA/Documentos/SalvarCodigoDeBarras");
     var urlObtemCodigoBarras = Url.Content("~/SIGA/Documentos/ObtemCodigoBarras");
-    var urlUploadAnexo = Url.Content("~/SIGA/Documentos/AdicionarAnexoDocumento");
+    var urlUploadFile = Url.Content("~/SIGA/Documentos/UploadFile");
+    var urlDonwloadFile = Url.Content("~/SIGA/Documentos/DownloadFile");
     var idCliente = ViewData["IdCliente"];
     var idsetor = ViewData["IdSetor"];
     var idTemporalidade = ViewData["IdTemporalidade"];
@@ -155,15 +156,14 @@
                 if (this.TamanhoMaximo > 0) {
                     strTamanhoMaximo = ' maxlength="' + this.TamanhoMaximo + '" ';
                 }
-                console.log(this.TamanhoMaximo);
                 tabela = tabela + '<input class="' + classPrimeiro +
                     ' form-control text-box single-line descritor" data-val="true" id="' + this.idDescritor +
                     '" name="' + this.idDescritor + '" type="text" value="' + this.ValorDescritor + '" ' + classTipoDescritor + strTamanhoMaximo + ' >';
                 tabela = tabela + ' </td></tr>';
                 classPrimeiro = '';
             });
-            //tabela = tabela + '<tr><td class="col-xs-6 col-sm-4"><input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="Anexo"></td>';
-            //tabela = tabela + '<td> <input type="file" tabIndex="-1" name="UploadFile" id="txtUploadFile" /> </td>';
+            tabela = tabela + '<tr><td class="col-xs-6 col-sm-4"><input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="Anexo"></td>';
+            tabela = tabela + '<td> <input type="file" tabIndex="-1" name="UploadFile" id="txtUploadFile" /> </td>';
             tabela = tabela + '</tr>';
 
 
@@ -321,6 +321,17 @@
 
         });
 
+        @*$("#divDocumentosLote").on("click", "input.btnDownloadAnexo", function () {
+            EsconderMensagemErro();
+            var idDocumento = this.getAttribute('data-iddocumento');
+
+            $.get('@urlDonwloadFile' + '/' + idDocumento,
+            function (data, textStatus, jqXHR) { /* don't think anything needs to be done */ }
+            ).error(alert('Download Falhou!'));
+
+
+        });*@
+
         function PreencheDocumentosDoLote(dados) {
             $('#divDocumentosLote').html('');
             var tabela = "";
@@ -330,7 +341,13 @@
                 tabela = tabela + '<td>' + this.SequencialDocumentoLote + '</td>';
                 tabela = tabela + '<td>' + this.DescricaoDocumento + '</td>';
                 tabela = tabela + '<td>' + this.DescricaoTipoDocumento + '</td>'
-                tabela = tabela + '<td style="white-space: nowrap;"><input class="btnEditar" type="button" value="Editar"  data-iddocumento="' + this.IdDocumento + '" </input> &nbsp; <input class="btnExcluir" type="button" value="Excluir"  data-iddocumento="' + this.IdDocumento + '" </input></td>';
+                tabela = tabela + '<td style="white-space: nowrap;" aligh="center"><input class="btnEditar" type="button" value="Editar"  data-iddocumento="' + this.IdDocumento + '" </input> &nbsp; <input class="btnExcluir" type="button" value="Excluir"  data-iddocumento="' + this.IdDocumento + '" </input>';
+                if (this.TemAnexo) {
+                   // tabela = tabela + '<br><br> <input class="btnDownloadAnexo" type="button" value="Anexo" data-iddocumento="' + this.IdDocumento + '" />';
+                    tabela = tabela + '<br><br> <a href="@urlDonwloadFile/' + this.IdDocumento + '" target="_blank" class="btnDownloadAnexo" > <i class="fa fa-paperclip fa-2x"></i>  </a>';
+                    //console.log('<br><br> <a href="@urlDonwloadFile/' + this.IdDocumento + '" target="_blank" class="btnDownloadAnexo" > <i class="fa fa-paperclip fa-2x"></i>  </a>');
+                }
+                tabela = tabela + '  </td>'
                 tabela = tabela + '</tr>'
 
             });
@@ -362,18 +379,41 @@
 
         function EfetuarUploadAnexo(idDocumento) {
 
-            var formData = new FormData($("#txtUploadFile")[0]);
+            var data = new FormData();
+
+            var files = $("#txtUploadFile").get(0).files;
+
+            // Add the uploaded image content to the form data collection
+            if (files.length > 0) {
+                data.append("UploadFile", files[0]);
+            }
+            data.append("IdDocumento", idDocumento);
+
+            // Make Ajax request with the contentType = false, and procesDate = false
+            var ajaxRequest = $.ajax({
+                type: "POST",
+                url: "@urlUploadFile" + "/" + idDocumento,
+                contentType: false,
+                processData: false,
+                data: data
+            });
+
+            ajaxRequest.done(function (xhr, textStatus) {
+                alert('Upload Efetuado com sucesso. ');
+            });
+
+            @*var formData = new FormData($("#txtUploadFile")[0]);
             console.log('-------- log do arquivo anexo --------');
             console.log(formData);
             console.log('-------- Fim log do arquivo anexo --------');
             $.ajax({
                 url: "@urlUploadAnexo",
                 type: 'POST',
-                data: { 
+                data: {
                     IdDocumento : idDocumento,
                     fileUpload : formData
                 },
-                async: true,
+                async: false,
                 success: function (data) {
                     alert("upload ok. ");
 
@@ -384,13 +424,12 @@
                 cache: false,
                 contentType: false,
                 processData: false
-            });
+            });*@
 
         }
 
         // para inserir documentos
         function SalvaDocumento() {
-            console.log('Inicio SAlvar Documento');
             EsconderMensagemErro();
             var varidCliente = $("#IdClienteTipoDocumento").val();
             var varIdDocumento = $("#idDocumentoEmEdicao").val();
@@ -417,7 +456,7 @@
                 datatype: 'json',
                 success: function (data) {
 
-                   // EfetuarUploadAnexo(data.Id);
+                    EfetuarUploadAnexo(data.Id);
 
                     // montar a lista de todos documentos no mesmo lote.
                     PreencheDocumentosDoLote(data.Dados);

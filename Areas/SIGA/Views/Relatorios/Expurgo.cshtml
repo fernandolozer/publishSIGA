@@ -7,116 +7,222 @@
     List<Documento> documentos = ViewBag.Documentos as List<Documento>;
     List<Setor> setores = ViewBag.Setores as List<Setor>;
     SIGA.Data.Business.DocumentoBusiness documentoBusiness = new SIGA.Data.Business.DocumentoBusiness();
+
+    var urlMantenedoras = Url.Content("~/SIGA/Documentos/GetTodasMantenedoras");
+    var urlClientes = Url.Content("~/SIGA/Documentos/GetClientesMantenedora");
+    var urlListarDocumentos = Url.Content("~/SIGA/Relatorios/RecuperarListaDocumentosExpurgo");
+
+    var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
+    
 }
 
 <script type="text/javascript">
-    $(function () {
-        $("#idClienteTipoDocumento").change(function () {
-            var elements = "";
-            if ($(this).val() == '') {
-                elements = '<option value="">[ Setor ]</option>';
-                $('#idSetorTipoDocumento').empty().attr('disabled', true).append(elements);
-                return;
-            }
-            $.ajax({
-                url: '@url',
-                type: 'POST',
-                data: { idCliente: $(this).val() },
-                datatype: 'json',
-                success: function (data) {
-                    elements = '<option value="">[ TODOS ]</option>';
-                    $.each(data, function () {
-                        elements = elements + '<option value="' + this.IdSetor + '">' + this.NomeSetor + '</option>';
-                    });
-                    $('#idSetorTipoDocumento').empty().attr('disabled', false).append(elements);
+    
+
+    var RelatorioController = function ($scope, $http) {
+       
+        // inicializa a variavel com todas as mantenedoras
+        $scope.init = function () {
+
+            $scope.anoSelecionado = 0;
+            $scope.permissaoFull = '@permissaoFull';
+            $scope.exibirCarregando = false;
+
+            $scope.Clientes = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@urlMantenedoras',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
                 }
+                $scope.Mantenedoras = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Mantenedoras = null;
             });
-        });
+
+        };
+
+        $scope.loadClientes = function () {
+            $scope.Setores = null;
+            $scope.TiposDocumento = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@urlClientes',
+                data: { idMantenedora: $scope.MantenedoraSelecionada },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Clientes = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Clientes = null;
+            });
+        };
+
+        $scope.loadSetores = function () {
+            $scope.TiposDocumento = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@url',
+                data: { idCliente: $scope.ClienteSelecionado },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Setores = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Setores = null;
+            });
+        };
+
+        $scope.ListarDocumentos = function () {
+            $scope.exibirCarregando = true;
+            $scope.Documentos = null;
+            var dictionary = {};
+            var listaImputs = document.getElementsByClassName('descritor');
+            for (var i = 0; i < listaImputs.length; i++) {
+                dictionary[listaImputs[i].id] = listaImputs[i].value;
+            }
+            if (dictionary == null || dictionary == '') {
+                dictionary[0] = '';
+            }
+
+            $http({
+                method: 'POST',
+                url: '@urlListarDocumentos',
+                data: {
+                    idCliente: $scope.ClienteSelecionado,
+                    idSetor: $scope.SetorSelecionado,
+                    Ano: $scope.anoSelecionado
+                },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                console.log('entrou sucesso');
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Documentos = data;
+                $scope.exibirCarregando = false;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Documentos = null;
+                console.log(data);
+                $scope.exibirCarregando = false;
+            });
+        };
 
 
-    });
+    };
 
 </script>
 
-@using (Html.BeginForm())
-{
-    <div class="no-print widget-box">
-        <div class="widget-header">
-            <h4 class="widget-title">Selecione o Cliente/Setor</h4>
-        </div>
-        <div class="widget-body">
-            <div class="widget-main">
-                <form class="form-inline">
-                    <div class="col-xs-5 col-sm-3">
-                        @Html.DropDownList("IdCliente", null, "[ Cliente ]", htmlAttributes: new { @class = "form-control", @id = "idClienteTipoDocumento" })
-                    </div>
-                    <div class="col-xs-5 col-sm-3">
-                        @Html.DropDownList("IdSetor", null, "[ Setor ]", htmlAttributes: new { @class = "form-control", @id = "idSetorTipoDocumento" })
+<div class="widget-box" ng-controller="RelatorioController">
+    <div class="widget-header">
+        <h4 class="widget-title">Relatório de expurgo</h4>
+    </div>
+    <div class="widget-body">
+        <div class="widget-main">
+            <div>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-3">
+                        <label class="control-label">Mantenedora</label>
+                        <select class="form-control" ng-init="init()" ng-change="loadClientes()" ng-model="MantenedoraSelecionada" ng-options="item.IdMantenedora as item.NomeMantenedora for item in Mantenedoras">
+                            <option value="">[ Selecione ]</option>
+                        </select>
                     </div>
 
-                    <div class="col-xs-2 col-sm-3">
-                        @Html.TextBox("Ano", null, htmlAttributes: new { @class = "form-control text-box single-line", @placeholder = "[ Ano ]" })
-
-                        
+                    <div class="col-xs-12 col-sm-3">
+                        <label class="control-label">Cliente</label>
+                        <select class="form-control" ng-disabled="Clientes == null" ng-change="loadSetores()" ng-model="ClienteSelecionado" ng-options="item.IdCliente as item.NomeCliente for item in Clientes">
+                            <option value="">[ Selecione ]</option>
+                        </select>
                     </div>
-                    <input type="submit" value="Pesquisar" class="btn btn-info btn-sm" />
-                </form>
+                    <div class="col-xs-12 col-sm-3">
+                        <label class="control-label">Setor</label>
+                        <select class="form-control" ng-disabled="Setores == null" ng-change="loadTiposDocumentos()" ng-model="SetorSelecionado" ng-options="item.IdSetor as item.NomeSetor for item in Setores">
+                            <option value="">[ Selecione ]</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-12 col-sm-3">
+                        <label class="control-label">Ano Referência</label>
+                        <input type="text" class="form-control" ng-model="anoSelecionado" />
+                    </div>
+
+                </div>
+                <br />
+                <div class="row right">
+                    <div class="col-xs-6 col-sm-6">
+                        <input type="button" id="btnPesquisa" ng-click="ListarDocumentos()" value="Pesquisar" class="btn btn-primary" />
+                    </div>
+                    <div class="col-xs-6 col-sm-6">
+                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spin fa-spinner"></i> Carregando Dados </span>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-
-}
-@if (documentos.Count > 0)
-{
-    foreach (Setor setor in setores)
-    {
-
-        <h3 class="widget-title grey lighter">
-            @setor.NomeSetor
-        </h3>
-
-        <div>
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th class="center">Caixa</th>
-                        <th class="center">Lote</th>
-                        <th>Tipo Documento</th>
-                        <th>Documento</th>
-                        <th>Prazo de guarda</th>
-                        <th>Destino</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (Documento item in documentos)
-                    {
-                        if (item.Setor.IdSetor == setor.IdSetor)
-                        {
-                            <tr>
-                                <td class="center">@item.Lote.Caixa.NumeroCaixa</td>
-                                <td class="center">@item.Lote.NumeroLote</td>
-
+    <div class="row">
+        <div class="col-xs-12 col-sm-12" id="replacetarget">
+            <div ng-hide="Documentos == null" class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Relatório</strong>
+                </div>
+                <div id="divDocumentos">
+                    <table class="table">
+                        <tbody>
+                            <tr><th>#</th><th>Descrição</th><th>Tipo</th><th>Data</th><th style="width: 80px">Ações</th></tr>
+                            <tr ng-repeat="doc in Documentos" ng-class="doc.CssTelaPesquisa">
                                 <td>
-                                    @item.ClienteTipoDocumento.TipoDocumento.NomeTipoDocumento
-                                </td>
-                                <td class="hidden-xs">
-                                    @Html.Raw(documentoBusiness.ObterDescricaoCompletaDocumento(item.IdDocumento).ToString())
+                                    <div>
+                                        Caixa = <strong>{{doc.NumeroCaixa}}</strong>
+                                    </div>
+                                    <div>
+                                        Lote = <strong>{{doc.NumeroLote}}</strong>
+                                    </div>
+                                    <div>
+                                        Sequencial = <strong>{{doc.SequencialDocumentoLote}}</strong>
+                                    </div>
                                 </td>
                                 <td>
-                                    @item.ClienteTipoDocumento.TotalPrazo
+                                    <div ng-repeat="desc in doc.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
+                                    <br />
                                 </td>
-                                <td>
-                                    @item.ClienteTipoDocumento.DestinacaoFinal
+                                <td>{{doc.DescricaoTipoDocumento}} </td>
+                                <td>{{doc.DataDocumento}} </td>
+                                <td style="white-space: nowrap;" class="grid-cell action-buttons">
+                                    
                                 </td>
                             </tr>
-                        }
-                    }
 
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+
+                </div>
+                <br />
+               
+
+            </div>
+
         </div>
+    </div>
+</div>
 
-    }
-    <div class="space"></div>
-}

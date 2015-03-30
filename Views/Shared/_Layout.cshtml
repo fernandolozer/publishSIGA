@@ -30,6 +30,7 @@
     <script src="@Url.Content("~/Scripts/ace-extra.min.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Scripts/gridmvc.js")" type="text/javascript"></script>
     <script src="~/Scripts/angular.min.js"></script>
+    <script src="~/Scripts/angularGrid-1.2.js"></script>
     @*<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script>*@
     @*<script type="text/javascript" src="https://code.angularjs.org/1.0.6/angular-sanitize.js"></script>*@
     @*<script src="@Url.Content("~/Scripts/angular.min.js")" type="text/javascript"></script>*@
@@ -176,7 +177,7 @@
             <div class="sidebar-shortcuts" id="sidebar-shortcuts">
                 <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
                     <i class="ace-icon fa fa-gears home-icon"></i>
-                    <span class="h6">versão 1.0.0.18</span>
+                    <span class="h6">versão 1.1.0.4</span>
                 </div>
 
                 <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
@@ -263,6 +264,15 @@
                                 <a href="@Url.Action("Index", "EstruturasFisicas", new { area = "SIGA" })">
                                     <i class="menu-icon fa fa-caret-right"></i>
                                     Estrutura Física
+                                </a>
+
+                                <b class="arrow"></b>
+                            </li>
+
+                            <li class="hover">
+                                <a href="@Url.Action("Index", "Caixas", new { area = "SIGA" })">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                    Caixas
                                 </a>
 
                                 <b class="arrow"></b>
