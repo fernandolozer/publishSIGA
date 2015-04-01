@@ -8,7 +8,8 @@
         // inicializa a variavel com todas as mantenedoras
 
         $scope.init = function () {
-            $http({
+            
+             $http({
                 method: 'GET',
                 url: '@Url.Content("~/SIGA/OrdemServicos/RecuperarOsPedidoPorUsuario")',
                 headers: { 'Content-Type': 'application/json; charset=utf-8' }
@@ -65,8 +66,13 @@
 
     };
 
-
+   
 </script>
+<div class="alert alert-info alert-dismissable" >
+    <span>Verifique se o seu bloqueador de popup está desbloqueado para exibir corretamente o canhoto da OS.</span>
+    <br />
+    <a href="http://youtu.be/ueYaxoUmhHc" target="_blank">Veja aqui como fazer no Chrome</a>
+</div>
 
 <div class="widget-box" ng-controller="OSController">
     <div class="widget-header">
