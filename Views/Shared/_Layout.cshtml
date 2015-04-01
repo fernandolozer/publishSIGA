@@ -63,6 +63,65 @@
 
         });
 
+        // codigos do controlador angularJs
+        var TopoController = function ($scope, $http) {
+
+            $scope.init = function () {
+                // busta os pedido
+                
+                $scope.AtualizarTopo();
+            }
+
+            $scope.AtualizarTopo = function () {
+                $http({
+                    method: 'GET',
+                    url: '@Url.Content("~/SIGA/OrdemServicos/RecuperarOsPedidoPorUsuario")',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+                })
+                .success(function (data) {
+                    $scope.ExisteOsPedido = false;
+                    if (data == '' || data.IdOrdemServico == 0) {
+                        $scope.ExisteOsPedido = false;
+                    }
+                    else {
+                        $scope.OsPedido = data;
+                        $scope.ExisteOsPedido = true;
+                        console.log($scope.ExisteOsPedido);
+                    }
+                }).error(function (data) {
+                    $scope.ExisteOsPedido = false;
+                    $scope.OsPedido = null;
+                });
+
+                // busta os devolucao
+                $http({
+                    method: 'GET',
+                    url: '@Url.Content("~/SIGA/OrdemServicos/RecuperarOsDevolucaoPorUsuario")',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+                })
+                .success(function (data) {
+                    $scope.ExisteOsDevolucao = false;
+                    if (data == '' || data.IdOrdemServico == 0) {
+                        $scope.ExisteOsDevolucao = false;
+                    }
+                    else {
+                        $scope.OsDevolucao = data;
+                        $scope.ExisteOsDevolucao = true;
+                        console.log($scope.ExisteOsPedido);
+                    }
+                }).error(function (data) {
+                    $scope.ExisteOsDevolucao = false;
+                    $scope.OsDevolucao = null;
+                });
+            }
+
+            $scope.$on('atualizar', function () {
+                $scope.AtualizarTopo();
+            });
+
+
+        };
+
     </script>
 
 </head>
@@ -95,33 +154,19 @@
                 </a>
             </div>
 
-            <div class="navbar-buttons navbar-header pull-right" role="navigation">
+            <div class="navbar-buttons navbar-header pull-right" role="navigation" ng-controller="TopoController" ng-init="init()">
                 <ul class="nav ace-nav">
-                    <li>
-                        @if (User.IsInRole("Cliente"))
-                        {
-                            if (existe != null)
-                            {
-                                <a class="" href="@Url.Action("Index", "OrdemServicos", new { area = "SIGA", isGerenciarOS = false })" data-rel="tooltip" title="OS Abertas">
-                                    <i class="ace-icon fa fa-bell icon-bell"></i>
-                                    <span class="badge badge-grey">@existe</span>
-                                </a>
-                            }
-                            else
-                            {
-                                <a class="" href="@Url.Action("Index", "OrdemServicos", new { area = "SIGA", isGerenciarOS = false })" data-rel="tooltip" title="OS Abertas">
-                                    <i class="ace-icon fa fa-bell icon-bell"></i>
-                                    <span class="badge badge-grey">@existe</span>
-                                </a>
-                            }
-                        }
-                        else if (User.IsInRole("Administrador"))
-                        {
-                            <a class="" href="@Url.Action("IndexAdministrarOSCliente", "OrdemServicos", new { area = "SIGA" })" data-rel="tooltip" title="OS Abertas">
-                                <i class="ace-icon fa fa-bell icon-bell"></i>
-                                <span class="badge badge-grey">@existe</span>
-                            </a>
-                        }
+                    <li ng-show="ExisteOsPedido">
+                        <a class="" href="@Url.Content("~/SIGA/OrdemServicos/FinalizarOSPedido")" data-rel="tooltip" title="OS Abertas">
+                            <i class="ace-icon fa fa-arrow-down"></i>
+                            <span >Finalizar Os Pedido</span>
+                        </a>
+                    </li>
+                    <li ng-show="ExisteOsDevolucao">
+                        <a class="" href="@Url.Content("~/SIGA/OrdemServicos/FinalizarOSDevolucao")" data-rel="tooltip" title="OS Abertas">
+                            <i class="ace-icon fa fa-arrow-up"></i>
+                            <span>Finalizar Os Devoluçao</span>
+                        </a>
                     </li>
                     <li>
                         <a data-toggle="dropdown" href="#" class="dropdown-toggle">
@@ -450,29 +495,25 @@
                         <b class="arrow"></b>
 
                         <ul class="submenu">
-                            @if (User.IsInRole("Cliente"))
-                            {
-                                <li class="hover">
-                                    <a href="@Url.Action("Index", "OrdemServicos", new {area = "SIGA", isGerenciarOS = false})">
-                                        <i class="menu-icon fa fa-caret-right"></i>
-                                        Ordem de Serviço
-                                    </a>
-
-                                    <b class="arrow"></b>
-                                </li>
-                            }
 
                             <li class="hover">
-                                <a href="@Url.Action("Index", "OrdemServicos", new {area = "SIGA", isGerenciarOS = true})">
+                                <a href="@Url.Action("VisualizarOrdensServicoEmTramiteCliente", "OrdemServicos", new { area = "SIGA" })">
                                     <i class="menu-icon fa fa-caret-right"></i>
-                                    Gerenciar OS dos Clientes
+                                    Ordem de Serviço Abertas do Cliente
                                 </a>
 
                                 <b class="arrow"></b>
                             </li>
 
-                            @if (User.IsInRole("Administrador"))
+                            @if (User.IsInRole("Administrador") || User.IsInRole("Funcionario"))
                             {
+                                <li class="hover">                                   
+                                    <a href="@Url.Action("Index", "OrdemServicos", new { area = "SIGA" })">
+                                        <i class="menu-icon fa fa-caret-right"></i>
+                                        Tramite de OS
+                                    </a>
+                                    <b class="arrow"></b>
+                                </li>
                                 <li class="hover">
                                     @*<a href="@Url.Action("EmConstrucao", "Util", new { area = "SIGA" })">*@
                                     <a href="@Url.Action("DevolucaoOrdemServico", "OrdemServicos", new { area = "SIGA" })">

@@ -145,7 +145,13 @@
                         </div>
                         <br />
                         <div class="row right" style="align-items:flex-end; ">
-                            <input ng-show="modoDestino != 0" type="button" value="Confirmar" ng-click="processarDevolucao()" class="btn btn-primary" />
+                            <div class="col-xs-6 col-sm-3">
+                                <input ng-show="modoDestino != 0" type="button" value="Confirmar" ng-click="processarDevolucao()" class="btn btn-primary" />
+                            </div>
+                            <div class="col-xs-6 col-sm-3">
+                                <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spin fa-spinner"></i> Carregando Dados </span>
+                            </div>
+
                         </div>
                     </div>
                 </div> @*if os != null*@
@@ -165,8 +171,10 @@
 
 
     var OSController = function ($scope, $http) {
+        $scope.exibirCarregando = false;
 
         $scope.loadOS = function () {
+            $scope.exibirCarregando = true;
             $http({
                 method: 'POST',
                 url: '@url',
@@ -183,15 +191,17 @@
                     if (data.mensagem != null)
                         $scope.MensagemErro = data.mensagem;
                 }
-
+                $scope.exibirCarregando = false;
             }).error(function (data) {
                 $scope.erroBusca = 1;
                 $scope.ordemServico = null;
-
+                $scope.exibirCarregando = false;
             });
         };
 
         $scope.loadLotes = function () {
+            $scope.exibirCarregando = true;
+            console.log($scope.exibirCarregando)
             $http({
                 method: 'POST',
                 url: '@urlCaixaManual',
@@ -206,9 +216,11 @@
                 $scope.Lotes = null;
 
             });
+            $scope.exibirCarregando = false;
         };
 
         $scope.processarDevolucao = function () {
+            $scope.exibirCarregando = true;
 
             $http({
                 method: 'POST',
@@ -222,10 +234,13 @@
 
             }).error(function (data) {
                 $scope.Lotes = null;
+                $scope.exibirCarregando = false;
+
             });
         };
 
         $scope.novaCaixa = function () {
+            $scope.exibirCarregando = true;
             $scope.erroCaixa = '';
             $http({
                 method: 'POST',
@@ -244,11 +259,12 @@
             }).error(function () {
                 $scope.erroCaixa = "Erro ao Criar Caixa. Preencher Corretamente o cliente e o numero da caixa.";
             });
-
+            $scope.exibirCarregando = false;
         };
 
 
         $scope.novoLote = function () {
+            $scope.exibirCarregando = true;
             $scope.erroCaixa = '';
             $http({
                 method: 'POST',
@@ -265,7 +281,7 @@
             }).error(function () {
                 $scope.erroCaixa = "Erro ao Criar Lote. Preencher Corretamente o cliente e o numero da caixa.";
             });
-
+            $scope.exibirCarregando = false;
         };
     }
 

@@ -75,10 +75,10 @@
         $(tabela).appendTo('#divDescritores');
     };
 
-    var PesquisaController = function ($scope, $http) {
+    var PesquisaController = function ($scope, $http, $rootScope) {
         // inicializa a variavel com todas as mantenedoras
         $scope.init = function () {
-
+            $scope.exibirCarregando = false;
             $scope.permissaoFull = '@permissaoFull';
 
             $scope.Clientes = null;
@@ -105,6 +105,7 @@
             $scope.Setores = null;
             $scope.TiposDocumento = null;
             $scope.Descritores = null;
+            $scope.exibirCarregando = true;
             $http({
                 method: 'POST',
                 url: '@urlClientes',
@@ -117,13 +118,16 @@
                     $scope.erroBusca = 1;
                 }
                 $scope.Clientes = data;
+                $scope.exibirCarregando = false;
             }).error(function (data) {
                 $scope.erroBusca = 1;
                 $scope.Clientes = null;
+                $scope.exibirCarregando = false;
             });
         };
 
         $scope.loadSetores = function () {
+            $scope.exibirCarregando = true;
             $scope.TiposDocumento = null;
             $scope.Descritores = null;
             $http({
@@ -138,13 +142,16 @@
                     $scope.erroBusca = 1;
                 }
                 $scope.Setores = data;
+                $scope.exibirCarregando = false;
             }).error(function (data) {
                 $scope.erroBusca = 1;
                 $scope.Setores = null;
+                $scope.exibirCarregando = false;
             });
         };
 
         $scope.loadTiposDocumentos = function () {
+            $scope.exibirCarregando = true;
             $scope.Descritores = null;
             $http({
                 method: 'POST',
@@ -158,14 +165,17 @@
                     $scope.erroBusca = 1;
                 }
                 $scope.TiposDocumento = data;
+                $scope.exibirCarregando = false;
             }).error(function (data) {
 
                 $scope.erroBusca = 1;
                 $scope.TiposDocumento = null;
+                $scope.exibirCarregando = false;
             });
         };
 
         $scope.loadDescritores = function () {
+            $scope.exibirCarregando = true;
             $http({
                 method: 'POST',
                 url: '@urlDescritores',
@@ -179,13 +189,17 @@
                 }
                 $scope.Descritores = data;
                 MontarListaDescritores(data);
+                $scope.exibirCarregando = false;
             }).error(function (data) {
                 $scope.erroBusca = 1;
                 $scope.Descritores = null;
+                $scope.exibirCarregando = false;
             });
         };
 
         $scope.pesquisaDocumentos = function () {
+            $scope.exibirCarregando = true;
+            console.log($scope.exibirCarregando);
             $scope.Documentos = null;
             var dictionary = {};
             var listaImputs = document.getElementsByClassName('descritor');
@@ -207,22 +221,24 @@
                 },
                 headers: { 'Content-Type': 'application/json; charset=utf-8' }
             })
-            .success(function (data) {
-                console.log('entrou sucesso');
+            .success(function (data) {                
                 $scope.erroBusca = 0;
                 if (data == '') {
                     $scope.erroBusca = 1;
                 }
                 $scope.Documentos = data;
+                $scope.exibirCarregando = false;
             }).error(function (data) {
                 $scope.erroBusca = 1;
                 $scope.Documentos = null;
                 console.log(data);
+                $scope.exibirCarregando = false;
             });
         };
 
 
         $scope.incluirDocumentoNaOS = function (idDocumento) {
+            $scope.exibirCarregando = true;
             var varIdDocumento = idDocumento;
             $http({
                 method: 'POST',
@@ -232,13 +248,18 @@
             })
             .success(function (data) {
                 alert("Adicionada a OS!");
+                $rootScope.$broadcast('atualizar');
+                $scope.exibirCarregando = false;
+
             }).error(function (data) {
                 alert("Erro ao adicionar a OS");
-            });
+                $scope.exibirCarregando = false;
 
+            });
         };
 
         $scope.devolverDocumentoNaOS = function (idDocumento) {
+            $scope.exibirCarregando = true;
             var varIdDocumento = idDocumento;
             $http({
                 method: 'POST',
@@ -248,59 +269,16 @@
             })
             .success(function (data) {
                 alert("Adicionada a OS!");
+                $rootScope.$broadcast('atualizar');
+                $scope.exibirCarregando = false;
             }).error(function (data) {
                 alert("Erro ao adicionar a OS");
+                $scope.exibirCarregando = false;
             });
-
         };
 
 
     }
-
-    // controle do modal
-    angular.module('ui.bootstrap.demo').controller('ModalDemoCtrl', function ($scope, $modal, $log) {
-
-        $scope.items = ['item1', 'item2', 'item3'];
-
-        $scope.open = function (size) {
-
-            var modalInstance = $modal.open({
-                templateUrl: 'myModalContent.html',
-                controller: 'ModalInstanceCtrl',
-                size: size,
-                resolve: {
-                    items: function () {
-                        return $scope.items;
-                    }
-                }
-            });
-
-            modalInstance.result.then(function (selectedItem) {
-                $scope.selected = selectedItem;
-            }, function () {
-                $log.info('Modal dismissed at: ' + new Date());
-            });
-        };
-    });
-
-    // Please note that $modalInstance represents a modal window (instance) dependency.
-    // It is not the same as the $modal service used above.
-
-    angular.module('ui.bootstrap.demo').controller('ModalInstanceCtrl', function ($scope, $modalInstance, items) {
-
-        $scope.items = items;
-        $scope.selected = {
-            item: $scope.items[0]
-        };
-
-        $scope.ok = function () {
-            $modalInstance.close($scope.selected.item);
-        };
-
-        $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
-        };
-    });
 
 </script>
 
@@ -346,9 +324,11 @@
                     </div>
                     <br />
                     <div class="row right">
-                        <div class="col-xs-6 col-sm-12">
+                        <div class="col-xs-6 col-sm-3">
                             <input type="button" id="btnPesquisaAvancada" ng-click="pesquisaDocumentos()" value="Pesquisar" class="btn btn-primary" />
-
+                        </div>
+                        <div class="col-xs-6 col-sm-3">
+                            <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spinner fa-spin"></i> Carregando Dados </span>
                         </div>
                     </div>
                 </div>
@@ -409,24 +389,6 @@
             </div>
         </div>
     </div>
-    <div ng-controller="ModalDemoCtrl">
-        <script type="text/ng-template" id="myModalContent.html">
-            <div class="modal-header">
-                <h3 class="modal-title">I'm a modal!</h3>
-            </div>
-            <div class="modal-body">
-                <ul>
-                    <li ng-repeat="item in items">
-                        <a ng-click="selected.item = item">{{ item }}</a>
-                    </li>
-                </ul>
-                Selected: <b>{{ selected.item }}</b>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" ng-click="ok()">OK</button>
-                <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
-            </div>
-        </script>
-    </div>
+   
 
 }

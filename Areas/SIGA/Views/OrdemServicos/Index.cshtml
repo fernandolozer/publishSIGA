@@ -1,52 +1,278 @@
-﻿@using GridMvc.Html
-@model IEnumerable<SIGA.Entities.Models.OrdemServico>
-
+﻿@using SIGA.Entities.Models;
+@using System.Linq;
 @{
-    ViewBag.Title = "Ordem de Serviço";
+    ViewBag.Title = "Visualizar Os";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    List<Documento> documentos = ViewBag.Documentos as List<Documento>;
+    List<Setor> setores = ViewBag.Setores as List<Setor>;
+    SIGA.Data.Business.DocumentoBusiness documentoBusiness = new SIGA.Data.Business.DocumentoBusiness();
+
+    var urlMantenedoras = Url.Content("~/SIGA/Documentos/GetTodasMantenedoras");
+    var urlClientes = Url.Content("~/SIGA/Documentos/GetClientesMantenedora");
+    var urlListarOS = Url.Content("~/SIGA/OrdemServicos/ObterListaOsAbertasCliente");
+
+    var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
+
 }
 
-<div class="">
-    <p class="widget-title">
-        <a class="btn btn-primary btn-sm" href="@Url.Action("Create")">
-            Criar Novo
-            <i class="ace-icon fa fa-file-o icon-on-right bigger-110">
-            </i>
-        </a>
-    </p>
-</div>
+<script type="text/javascript">
 
 
-<div class="widget-box">
+    var ListagemController = function ($scope, $http) {
+
+        // inicializa a variavel com todas as mantenedoras
+        $scope.init = function () {
+
+            $scope.MantenedoraSelecionada = 0;
+            $scope.ClienteSelecionado = 0;
+            $scope.SetorSelecionado = 0;
+            $scope.permissaoFull = '@permissaoFull';
+            $scope.exibirCarregando = false;
+
+            $scope.Clientes = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@urlMantenedoras',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Mantenedoras = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Mantenedoras = null;
+            });
+
+        };
+
+        $scope.loadClientes = function () {
+            $scope.Setores = null;
+            $scope.TiposDocumento = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@urlClientes',
+                data: { idMantenedora: $scope.MantenedoraSelecionada },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Clientes = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Clientes = null;
+            });
+        };
+
+        $scope.loadSetores = function () {
+            $scope.TiposDocumento = null;
+            $scope.Descritores = null;
+            $http({
+                method: 'POST',
+                url: '@url',
+                data: { idCliente: $scope.ClienteSelecionado },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Setores = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Setores = null;
+            });
+        };
+
+
+
+        $scope.ListarOs = function () {
+            $scope.exibirCarregando = true;
+            $http({
+                method: 'POST',
+                url: '@urlListarOS',
+                data: {
+                    idMantenedora: $scope.MantenedoraSelecionada,
+                    idCliente: $scope.ClienteSelecionado,
+                    idSetor: $scope.SetorSelecionado
+                },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                console.log('entrou sucesso');
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.ListaOs = data;
+                $scope.exibirCarregando = false;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.ListaOs = null;
+                console.log(data);
+                $scope.exibirCarregando = false;
+            });
+        };
+
+        $scope.AvancarOS = function (ordem) {
+            if (confirm('Deseja realmente mover a OS para o status ' + ordem.ProximoStatusOrdemServico)) {
+                var data = prompt("Informe a DATA da movimentação da OS. \nO formato deve ser dia/mes/ano \nExemplo: 01/01/2015. \nPara usar a data de HOJE deixe em branco.\nVocê pode apertar ENTER após digitar.", "");
+                var hora = prompt("Informe a HORA da movimentação da OS. \nO formato deve ser hora:minutos \nExemplo: 17:30. \nPara usar a hora de AGORA deixe em branco.\nVocê pode apertar ENTER após digitar.", "");
+                console.log(data);
+                console.log(hora);
+                $scope.exibirCarregando = true;
+                $http({
+                    method: 'POST',
+                    url: '@Url.Content("~/SIGA/OrdemServicos/MovimentarOs")',
+                    data: { ordemServico: ordem, data : data, hora : hora},
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+                })
+           .success(function (data) {
+               $scope.TemErro = 0;
+               if (data.TemErro == '1') {
+                   alert(data.Mensagem);
+               }
+               $scope.ListarOs();
+           }).error(function (data) {
+               $scope.TemErro = 1;
+               $scope.ListarOs();
+           });
+
+            }
+        }
+
+
+    };
+
+</script>
+
+<div class="widget-box" ng-controller="ListagemController">
     <div class="widget-header">
-        <h5 class="widget-title bigger lighter">
-            <i class="ace-icon fa fa-table"></i>
-            Ordem de Serviço
-        </h5>
+        <h4 class="widget-title">Tramite de OS</h4>
     </div>
-
     <div class="widget-body">
-        <div class="widget-main no-padding">
+        <div class="widget-main">
             <div>
-                @Html.Grid(Model).SetLanguage("pt-br").Columns(g =>
-                    {
-                        g.Add(n => n.NomeOrdemServico).Titled("Nome");
-                        g.Add(n => n.StatusOrdemServico).Titled("Status");
-                        g.Add(n => n.DataPedidoOrdemServico).Titled("Data Pedido").Format("{0:dd-MM-yyyy}");
-                        g.Add(n => n.TipoOrdemServico).Titled("Tipo");
-                        g.Add()
-                            .Css("action-buttons")
-                            .SetWidth(100)
-                            .Titled("Ação")
-                            .Encoded(false)
-                            .Sanitized(false)
-                            .RenderValueAs(p =>
-                                @Html.ActionLink(" ", "Details", new { id = p.IdOrdemServico }, new { @class = "blue ace-icon fa fa-search-plus bigger-140", @title = "Visualizar" }).ToHtmlString() +
-                                @Html.ActionLink(" ", "Edit", new { id = p.IdOrdemServico }, new { @class = "green ace-icon fa fa-pencil bigger-140", @title = "Editar" }).ToHtmlString() +
-                                @Html.ActionLink(" ", "Delete", new { id = p.IdOrdemServico }, new { @class = "red ace-icon fa fa-trash-o bigger-140", @title = "Excluir" }).ToHtmlString());
+                <div class="row">
+                    <div class="col-xs-12 col-sm-3">
+                        <label class="control-label">Mantenedora</label>
+                        <select class="form-control" ng-init="init()" ng-change="loadClientes()" ng-model="MantenedoraSelecionada" ng-options="item.IdMantenedora as item.NomeMantenedora for item in Mantenedoras">
+                            <option value="">[ Selecione ]</option>
+                        </select>
+                    </div>
 
-                    }).WithPaging(50).Sortable(true).Filterable(true).Selectable(false)
+                    <div class="col-xs-12 col-sm-3">
+                        <label class="control-label">Cliente</label>
+                        <select class="form-control" ng-disabled="Clientes == null" ng-change="loadSetores()" ng-model="ClienteSelecionado" ng-options="item.IdCliente as item.NomeCliente for item in Clientes">
+                            <option value="">[ Selecione ]</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-12 col-sm-3">
+                        <label class="control-label">Setor</label>
+                        <select class="form-control" ng-disabled="Setores == null" ng-model="SetorSelecionado" ng-options="item.IdSetor as item.NomeSetor for item in Setores">
+                            <option value="">[ Selecione ]</option>
+                        </select>
+                    </div>
+
+
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-xs-12 col-sm-3" hidden>
+                        <label class="control-label">Tipo OS</label>
+                        <select class="form-control" ng-model="TipoOsSelecionado">
+                            <option value="">[ Selecione ]</option>
+                        </select>
+                    </div>
+                    <div class="col-xs-12 col-sm-3" hidden>
+                        <label class="control-label">Status</label>
+                        <select class="form-control" ng-model="StatusSelecionado">
+                            <option value="">[ Selecione ]</option>
+                        </select>
+                    </div>
+
+
+                </div>
+                <br />
+                <div class="row right">
+                    <div class="col-xs-6 col-sm-3">
+                        <input type="button" id="btnPesquisa" ng-click="ListarOs()" value="Buscar" class="btn btn-primary" />
+                    </div>
+
+                    <div class="col-xs-6 col-sm-3">
+                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-pulse fa-spinner"></i> Carregando Dados </span>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-12">
+            <div ng-hide="ListaOs == null" class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Listagem</strong>
+                </div>
+                <div id="divDocumentos">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Relatorio</th>
+                                <th>Relatorio Interno</th>
+                                <th>Cliente</th>
+                                <th>Ordem de Serviço</th>
+                                <th>Tipo</th>
+                                <th>Status</th>
+                                <th>Movimentar</th>
+
+                            </tr>
+                            <tr ng-repeat="os in ListaOs">
+                                <td>
+                                    <a href="@Url.Content("~/SIGA/OrdemServicos/Relatorio")/{{os.IdOrdemServico}}" target="_blank">
+                                        <i class="gray ace-icon fa fa-print bigger-140"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="@Url.Content("~/SIGA/OrdemServicos/RelatorioInterno")/{{os.IdOrdemServico}}" target="_blank">
+                                        <i class="gray ace-icon fa fa-bars bigger-140"></i>
+                                    </a>
+                                </td>
+                                <td>{{os.Cliente}}</td>
+                                <td>{{os.NomeOrdemServico}}</td>
+                                <td> <i ng-class="os.TipoOrdemServico == 'Pedido'? 'fa fa-arrow-down green' : 'fa fa-arrow-up red'"></i>  {{os.TipoOrdemServico}}</td>
+                                <td>{{os.StatusOrdemServico}}</td>
+                                <td>
+                                    <div ng-show="os.ProximoStatusOrdemServico != 'Nulo'">
+                                        <input type="button" value="Avançar" ng-click="AvancarOS(os)" />
+                                        <span> Mover Tarefa para <strong>{{os.ProximoStatusOrdemServico}}</strong></span>
+                                    </div>
+                                    <div ng-show="os.ProximoStatusOrdemServico == 'Nulo'">
+                                        <span>Os Finalizada.</span>
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+                <br />
+
+
+            </div>
+
+        </div>
+    </div>
 </div>
+

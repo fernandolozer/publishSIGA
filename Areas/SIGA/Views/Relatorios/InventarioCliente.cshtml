@@ -1,7 +1,7 @@
 ﻿@using SIGA.Entities.Models;
 @using System.Linq;
 @{
-    ViewBag.Title = "Relatorio de Expurgo";
+    ViewBag.Title = "Relatorio de Inventario do Cliente";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
     List<Documento> documentos = ViewBag.Documentos as List<Documento>;
@@ -17,6 +17,7 @@
 }
 
 <script type="text/javascript">
+    
     
 
     var RelatorioController = function ($scope, $http) {
@@ -134,20 +135,67 @@
         };
 
        
-        $scope.CriarCabecalho = function (role) {
-            showHeader = (role != $scope.SetorAtual);
-            $scope.SetorAtual = role;
-            console.log(role + ' - ' + $scope.SetorAtual);
-            return showHeader;
+        var filtrarSetores = {};
+        $scope.setoresParaFiltrar = function () {
+            filtrarSetores = {};
+            for (var i = 0 ; i < $scope.Documentos.length ; i++) {
+                var o = filtrarSetores[$scope.Documentos[i].NomeSetor];
+                if (!o) {
+                    filtrarSetores[$scope.Documentos[i].NomeSetor] = o = [];
+                }
+                o.push($scope.Documentos[i].NomeSetor)
+            }
+            return filtrarSetores;
+            //return $scope.Documentos;
         }
 
+
+        $scope.filtrarSetor = function (setor) {
+            setorEhNovo = filtrarSetores.indexOf(setor) < 0;
+            if (setorEhNovo) {
+                filtrarSetores.push(setor);
+                console.log(setorEhNovo);
+
+            }
+            console.log(filtrarSetores);
+            return setorEhNovo;
+        }
+
+      
+        // -------------------------------------------------------
+        // Grid
+        var module = angular.module("RelatorioController", ["angularGrid"]);
+
+        module.controller("RelatorioController", function ($scope) {
+
+            var columnDefs = [
+                { displayName: "Make", field: "make" },
+                { displayName: "Model", field: "model" },
+                { displayName: "Price", field: "price" }
+            ];
+
+            var rowData = [
+                { make: "Toyota", model: "Celica", price: 35000 },
+                { make: "Ford", model: "Mondeo", price: 32000 },
+                { make: "Porsche", model: "Boxter", price: 72000 }
+            ];
+
+            $scope.gridOptions = {
+                columnDefs: columnDefs,
+                rowData: rowData,
+                dontUseScrolls: true // because so little data, no need to use scroll bars
+            };
+
+        });
+
     };
+
 
 </script>
 
 <div class="widget-box" ng-controller="RelatorioController">
     <div class="widget-header">
-        <h4 class="widget-title">Relatório de expurgo</h4>
+        <h4 class="widget-title">Relatório de Inventario</h4>
     </div>
     <div class="widget-body">
         <div class="widget-main">
@@ -179,7 +227,7 @@
                         <input type="button" id="btnPesquisa" ng-click="ListarDocumentos()" value="Pesquisar" class="btn btn-primary" />
                     </div>
                     <div class="col-xs-6 col-sm-6">
-                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spin fa-spinner"></i> Carregando Dados </span>
+                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-pulse fa-spinner"></i> Carregando Dados </span>
                     </div>
                 </div>
 
@@ -193,40 +241,45 @@
                     <strong>Relatório</strong>
                 </div>
                 <div id="divDocumentos">
-                    <table class="table">
-                        <tbody>
-                            <tr><th>Setor</th><th>#</th><th>Descrição</th><th>Tipo</th><th>Data</th><th style="width: 80px">Ações</th></tr>
-                            <tr ng-repeat="doc in Documentos">
-                                <div class="h4" ng-show="CriarCabecalho(doc.NomeSetor)">
-                                    Totais do {{doc.NomeSetor}} - 
-                                </div>
 
-                                <td>{{doc.NomeSetor}}</td>
-                                <td>
-                                    <div>
-                                        Caixa = <strong>{{doc.NumeroCaixa}}</strong>
-                                    </div>
-                                    <div>
-                                        Lote = <strong>{{doc.NumeroLote}}</strong>
-                                    </div>
-                                    <div>
-                                        Sequencial = <strong>{{doc.SequencialDocumentoLote}}</strong>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div ng-repeat="desc in doc.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
-                                    <br />
-                                </td>
-                                <td>{{doc.DescricaoTipoDocumento}} </td>
-                                <td>{{doc.DataDocumento}} </td>
-                                <td style="white-space: nowrap;" class="grid-cell action-buttons">
-                                    
-                                </td>                              
+                    <div angular-grid="gridOptions" class="ag-fresh"></div>
 
-                            </tr>
 
-                        </tbody>
-                    </table>
+                    @*<div ng-repeat="docs in setoresParaFiltrar() | filter:filtrarSetor ">
+                        <h3>{{docs.NomeSetor}}</h3>
+                        <table class="table">
+                            <tbody>
+                                <tr><th>Setor</th><th>#</th><th>Descrição</th><th>Tipo</th><th>Data</th><th style="width: 80px">Ações</th></tr>
+                                <tr ng-repeat="doc in Documentos | filter: {NomeSetor: docs.NomeSetor}">
+                                    <td>{{doc.NomeSetor}}</td>
+                                    <td>
+                                        <div>
+                                            Caixa = <strong>{{doc.NumeroCaixa}}</strong>
+                                        </div>
+                                        <div>
+                                            Lote = <strong>{{doc.NumeroLote}}</strong>
+                                        </div>
+                                        <div>
+                                            Sequencial = <strong>{{doc.SequencialDocumentoLote}}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div ng-repeat="desc in doc.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
+                                        <br />
+                                    </td>
+                                    <td>{{doc.DescricaoTipoDocumento}} </td>
+                                    <td>{{doc.DataDocumento}} </td>
+                                    <td style="white-space: nowrap;" class="grid-cell action-buttons"></td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>*@
+
+
+                    
 
                 </div>
                 <br />

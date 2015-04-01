@@ -1,0 +1,136 @@
+﻿@{
+    ViewBag.Title = "FinalizarOSPedido";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script>
+    var OSController = function ($scope, $http, $window) {
+
+        // inicializa a variavel com todas as mantenedoras
+
+        $scope.init = function () {
+            $http({
+                method: 'GET',
+                url: '@Url.Content("~/SIGA/OrdemServicos/RecuperarOsPedidoPorUsuario")',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.ExisteOsPedido = false;
+                if (data == '') {
+                    $scope.ExisteOsPedido = false;
+                }
+                else {
+                    $scope.OsPedido = data;
+                    $scope.ExisteOsPedido = true;
+                    console.log($scope.OsPedido);
+                }
+            }).error(function (data) {
+                $scope.ExisteOsPedido = false;
+                $scope.OsPedido = null;
+            });
+
+        };
+
+        $scope.FinalizarOs = function () {
+            $http({
+                method: 'POST',
+                url: '@Url.Content("~/SIGA/OrdemServicos/TerminarOrdemServico")',
+                data: {os : $scope.OsPedido}                
+            })
+           .success(function (data) {
+               // redirecionar para pagina que vai exibir todas as OS do cliente
+               var url = '@Url.Content("~/SIGA/OrdemServicos/Relatorio")/' + $scope.OsPedido.IdOrdemServico;
+               $window.location.href = '@Url.Content("~/SIGA/OrdemServicos/VisualizarOrdensServicoEmTramiteCliente")';
+               $window.open(url, '_blank');
+           }).error(function (data) {
+               $scope.ExisteOsPedido = false;
+               $scope.OsPedido = null;
+           });
+        }
+
+        $scope.CancelarOs = function () {
+            $http({
+                method: 'POST',
+                url: '@Url.Content("~/SIGA/OrdemServicos/CancelarOrdemServico")',
+                data: { os: $scope.OsPedido }
+            })
+           .success(function (data) {
+               // redirecionar para pagina que vai exibir todas as OS do cliente
+               $window.location.href = '@Url.Content("~/")';
+               
+           }).error(function (data) {
+               $scope.ExisteOsPedido = false;
+               $scope.OsPedido = null;
+           });
+        }
+
+    };
+
+
+</script>
+
+<div class="widget-box" ng-controller="OSController">
+    <div class="widget-header">
+        <h4 class="widget-title">Finalizar Ordem de Serviço</h4>
+    </div>
+    <div class="widget-body" ng-show="ExisteOsPedido" ng-init="init()">
+        <div class="widget-main">
+            <div>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6">
+                        <label class="control-label">Ordem de Serviço</label>
+                        <input type="text" class="form-control" disabled ng-model="OsPedido.NomeOrdemServico" />
+                    </div>
+
+                </div>
+                <br />
+                <div class="row right">
+                    <div class="col-xs-12 col-sm-12">
+                        <label class="control-label">Observações Gerais</label>
+                        <input type="text" class="form-control" ng-model="OsPedido.ObservacaoOrdemServico" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="widget-box">
+            <h4>Documentos nesta ordem de serviço</h4>
+            <div>
+                <table class="table table-responsive table-striped">
+                    <tr>
+                        <th>Documento</th>
+                        <th>Observação</th>
+                    </tr>
+                    <tr ng-repeat="itemOs in OsPedido.ListaItens">
+                        <td>
+                            <div ng-repeat="desc in itemOs.Documento.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
+                            <br />
+                        </td>
+                        <td>
+                            <input type="text" ng-model="itemOs.ObservacaoEntrega" />
+                        </td>
+
+
+                    </tr>
+
+
+                </table>
+
+            </div>
+        </div>
+        <div class="separator"></div>
+        <div class="row">
+            <div class="col-xs-12 col-sm-3">
+            </div>
+            <div class="col-xs-12 col-sm-3">
+                <input type="button" class="btn btn-success" ng-click="FinalizarOs()" value="Finalizar Ordem de Serviço" />
+            </div>
+
+            <div class="col-xs-12 col-sm-3">
+                <input type="button" class="btn btn-danger" ng-click="CancelarOs()" value="Cancelar Ordem de Serviço" />
+            </div>
+
+        </div>
+    </div>
+
+</div>
+

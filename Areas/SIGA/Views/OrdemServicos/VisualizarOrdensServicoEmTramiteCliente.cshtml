@@ -1,7 +1,7 @@
 ﻿@using SIGA.Entities.Models;
 @using System.Linq;
 @{
-    ViewBag.Title = "Relatorio de Expurgo";
+    ViewBag.Title = "Visualizar Os";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
     List<Documento> documentos = ViewBag.Documentos as List<Documento>;
@@ -10,17 +10,17 @@
 
     var urlMantenedoras = Url.Content("~/SIGA/Documentos/GetTodasMantenedoras");
     var urlClientes = Url.Content("~/SIGA/Documentos/GetClientesMantenedora");
-    var urlListarDocumentos = Url.Content("~/SIGA/Relatorios/RecuperarListaDocumentosExpurgo");
+    var urlListarOS = Url.Content("~/SIGA/OrdemServicos/ObterListaOsAbertasCliente");
 
     var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
-    
+
 }
 
 <script type="text/javascript">
-    
 
-    var RelatorioController = function ($scope, $http) {
-       
+
+    var ListagemController = function ($scope, $http) {
+
         // inicializa a variavel com todas as mantenedoras
         $scope.init = function () {
 
@@ -91,31 +91,19 @@
             });
         };
 
-        $scope.EnviarAprovacao = function () {
-            if (confirm('Deseja Enviar os documentos para aprovação de expurgo?')) {
-                // implementar codigo
-            }
-        }
 
-        $scope.ListarDocumentos = function () {
+
+        $scope.ListarOs = function () {
             $scope.exibirCarregando = true;
-            $scope.Documentos = null;
-            var dictionary = {};
-            var listaImputs = document.getElementsByClassName('descritor');
-            for (var i = 0; i < listaImputs.length; i++) {
-                dictionary[listaImputs[i].id] = listaImputs[i].value;
-            }
-            if (dictionary == null || dictionary == '') {
-                dictionary[0] = '';
-            }
+
 
             $http({
                 method: 'POST',
-                url: '@urlListarDocumentos',
+                url: '@urlListarOS',
                 data: {
+                    idMantenedora : $scope.MantenedoraSelecionada,
                     idCliente: $scope.ClienteSelecionado,
-                    idSetor: $scope.SetorSelecionado,
-                    Ano: $scope.anoSelecionado
+                    idSetor: $scope.SetorSelecionado
                 },
                 headers: { 'Content-Type': 'application/json; charset=utf-8' }
             })
@@ -125,11 +113,11 @@
                 if (data == '') {
                     $scope.erroBusca = 1;
                 }
-                $scope.Documentos = data;
+                $scope.ListaOs = data;
                 $scope.exibirCarregando = false;
             }).error(function (data) {
                 $scope.erroBusca = 1;
-                $scope.Documentos = null;
+                $scope.ListaOs = null;
                 console.log(data);
                 $scope.exibirCarregando = false;
             });
@@ -140,9 +128,9 @@
 
 </script>
 
-<div class="widget-box" ng-controller="RelatorioController">
+<div class="widget-box" ng-controller="ListagemController">
     <div class="widget-header">
-        <h4 class="widget-title">Relatório de expurgo</h4>
+        <h4 class="widget-title">Visualizar Ordens de Serviço</h4>
     </div>
     <div class="widget-body">
         <div class="widget-main">
@@ -167,60 +155,49 @@
                             <option value="">[ Selecione ]</option>
                         </select>
                     </div>
-                    <div class="col-xs-12 col-sm-3">
-                        <label class="control-label">Ano Referência</label>
-                        <input type="text" class="form-control" ng-model="anoSelecionado" />
-                    </div>
+
 
                 </div>
                 <br />
                 <div class="row right">
                     <div class="col-xs-6 col-sm-3">
-                        <input type="button" id="btnPesquisa" ng-click="ListarDocumentos()" value="Pesquisar" class="btn btn-primary" />
+                        <input type="button" id="btnPesquisa" ng-click="ListarOs()" value="Buscar" class="btn btn-primary" />
                     </div>
-                    <div class="col-xs-6 col-sm-6">
-                        <input type="button" id="btnEnviarAprovacao" ng-click="EnviarAprovacao()" value="Enviar Selecionados para Aprovação de Expurgo" class="btn btn-danger" />
-                    </div>
+
                     <div class="col-xs-6 col-sm-3">
-                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-pulse fa-spinner"></i> Carregando Dados </span>
+                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spin fa-spinner"></i> Carregando Dados </span>
                     </div>
-                    
+
                 </div>
 
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-12 col-sm-12" id="replacetarget">
-            <div ng-hide="Documentos == null" class="panel panel-default">
+        <div class="col-xs-12 col-sm-12">
+            <div ng-hide="ListaOs == null" class="panel panel-default">
                 <div class="panel-heading">
-                    <strong>Relatório</strong>
+                    <strong>Listagem</strong>
                 </div>
                 <div id="divDocumentos">
-                    <table class="table">
+                    <table class="table table-striped">
                         <tbody>
-                            <tr><th>#</th><th>Descrição</th><th>Tipo</th><th>Data</th><th style="width: 80px">Ações</th></tr>
-                            <tr ng-repeat="doc in Documentos" ng-class="doc.CssTelaPesquisa">
+                            <tr>
+                                <th>Relatorio</th>
+                                <th>Ordem de Serviço</th>
+                                <th>Tipo</th>
+                                <th>Status</th>
+
+                            </tr>
+                            <tr ng-repeat="os in ListaOs">
                                 <td>
-                                    <div>
-                                        Caixa = <strong>{{doc.NumeroCaixa}}</strong>
-                                    </div>
-                                    <div>
-                                        Lote = <strong>{{doc.NumeroLote}}</strong>
-                                    </div>
-                                    <div>
-                                        Sequencial = <strong>{{doc.SequencialDocumentoLote}}</strong>
-                                    </div>
+                                    <a href="@Url.Content("~/SIGA/OrdemServicos/Relatorio")/{{os.IdOrdemServico}}" target="_blank">
+                                        <i class="gray ace-icon fa fa-print bigger-140"></i>
+                                    </a>
                                 </td>
-                                <td>
-                                    <div ng-repeat="desc in doc.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
-                                    <br />
-                                </td>
-                                <td>{{doc.DescricaoTipoDocumento}} </td>
-                                <td>{{doc.DataDocumento}} </td>
-                                <td style="white-space: nowrap;" class="grid-cell action-buttons">
-                                    <input type="checkbox" ng-model="doc.Selecionado" class="form-control" />
-                                </td>
+                                <td>{{os.NomeOrdemServico}}</td>
+                                <td>{{os.TipoOrdemServico}}</td>
+                                <td>{{os.StatusOrdemServico}}</td>
                             </tr>
 
                         </tbody>
@@ -228,7 +205,7 @@
 
                 </div>
                 <br />
-               
+
 
             </div>
 
