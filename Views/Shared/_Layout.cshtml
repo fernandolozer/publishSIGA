@@ -326,7 +326,7 @@
                     </li>
                 }
 
-                @if (User.IsInRole("Administrador"))
+                @if (User.IsInRole("Administrador") || User.IsInRole("Funcionário"))
                 {
                     <li class="hsub hover">
                         <a href="#" class="dropdown-toggle">
@@ -513,7 +513,7 @@
                                 <b class="arrow"></b>
                             </li>
 
-                            @if (User.IsInRole("Administrador") || User.IsInRole("Funcionario"))
+                            @if (User.IsInRole("Administrador") || User.IsInRole("Funcionário"))
                             {
                                 <li class="hover">                                   
                                     <a href="@Url.Action("Index", "OrdemServicos", new { area = "SIGA" })">
