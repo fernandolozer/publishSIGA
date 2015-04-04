@@ -455,6 +455,16 @@
 
                                 <b class="arrow"></b>
                             </li>
+
+                            <li class="hover">
+                                <a href="@Url.Action("VisualizarDocumentosEmprestados", "Documentos", new { area = "SIGA" })">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                    Documentos Emprestados com um Cliente
+                                </a>
+
+                                <b class="arrow"></b>
+                            </li>
+
                         </ul>
                     </li>
                 }
@@ -483,6 +493,20 @@
                                 <a href="@Url.Action("Index", "Documentos", new { area = "SIGA" })">
                                     <i class="menu-icon fa fa-caret-right"></i>
                                     Pesquisa de Documento
+                                </a>
+                                <b class="arrow"></b>
+                            </li>
+                            <li class="hover">
+                                <a href="@Url.Action("VisualizarDocumentosEmprestados", "Documentos", new { area = "SIGA" })">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                   Listar documentos Emprestados
+                                </a>
+                                <b class="arrow"></b>
+                            </li>
+                            <li class="hover">
+                                <a href="@Url.Action("VisualizarDocumentosExpurgo", "Documentos", new { area = "SIGA" })">
+                                    <i class="menu-icon fa fa-caret-right"></i>
+                                    Aprovar Expurgo
                                 </a>
                                 <b class="arrow"></b>
                             </li>

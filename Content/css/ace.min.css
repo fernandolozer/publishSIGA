@@ -8465,7 +8465,7 @@ label.inline {
 
 textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"] {
     border-radius: 0 !important;
-    color: #858585;
+    color: #191919;
     background-color: #fff;
     border: 1px solid #d5d5d5;
     padding: 5px 4px 6px;
@@ -8484,7 +8484,8 @@ textarea, input[type="text"], input[type="password"], input[type="datetime"], in
     textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus {
         -webkit-box-shadow: none;
         box-shadow: none;
-        color: #696969;
+        color: #191919;
+        font-weight: bold;
         border-color: #f59942;
         background-color: #fff;
         outline: none;
@@ -8494,13 +8495,13 @@ textarea, input[type="text"], input[type="password"], input[type="datetime"], in
     border-radius: 0;
     -webkit-box-shadow: none !important;
     box-shadow: none !important;
-    color: #858585;
+    color: #191919;
     background-color: #fff;
     border: 1px solid #d5d5d5;
 }
 
     .form-control:focus, select:focus {
-        color: #696969;
+        color: #191919;
         border-color: #f59942;
         background-color: #fff;
         outline: none;

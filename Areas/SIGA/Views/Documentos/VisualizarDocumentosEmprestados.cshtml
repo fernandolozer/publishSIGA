@@ -1,7 +1,7 @@
 ﻿@using SIGA.Entities.Models;
 @using System.Linq;
 @{
-    ViewBag.Title = "Relatorio de Expurgo";
+    ViewBag.Title = "Visualizar Documentos Emprestados";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
     List<Documento> documentos = ViewBag.Documentos as List<Documento>;
@@ -10,18 +10,18 @@
 
     var urlMantenedoras = Url.Content("~/SIGA/Documentos/GetTodasMantenedoras");
     var urlClientes = Url.Content("~/SIGA/Documentos/GetClientesMantenedora");
-    var urlListarDocumentos = Url.Content("~/SIGA/Relatorios/RecuperarListaDocumentosExpurgo");
-    var urlEnviarParaExpurgo = Url.Content("~/SIGA/Documentos/EnviarDocumentosParaExpurgo");
-    var urlExpurgar = Url.Content("~/SIGA/Documentos/ExpurgarDocumentos");
+    var urlListarDocumentos = Url.Content("~/SIGA/Documentos/ListarDocumentosEmprestados");
 
     var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
-
+    var urlDonwloadFile = Url.Content("~/SIGA/Documentos/DownloadFile");
+    var urlDevolverOS = Url.Content("~/SIGA/Documentos/DevolverOS");
+    
 }
 
 <script type="text/javascript">
 
 
-    var RelatorioController = function ($scope, $http) {
+    var ListagemController = function ($scope, $http, $rootScope) {
 
         // inicializa a variavel com todas as mantenedoras
         $scope.init = function () {
@@ -29,7 +29,7 @@
             $scope.anoSelecionado = 0;
             $scope.permissaoFull = '@permissaoFull';
             $scope.exibirCarregando = false;
-            $scope.modoPesquisa = 1;
+
             $scope.Clientes = null;
             $scope.Descritores = null;
             $http({
@@ -93,86 +93,17 @@
             });
         };
 
-        $scope.EnviarAprovacao = function () {
-            if (confirm('Deseja Enviar os documentos para aprovação de expurgo?')) {
-                $scope.exibirCarregando = true;
-                var listaDocumentosExpurgar = new Array();
-                for (var i = 0; i < $scope.Documentos.length; i++) {
-                    if ($scope.Documentos[i].Selecionado) {
-                        listaDocumentosExpurgar.push($scope.Documentos[i].IdDocumento);
-                    }
-                }
-                $http({
-                    method: 'POST',
-                    url: '@urlEnviarParaExpurgo',
-                    data: { ListaDocumentos: listaDocumentosExpurgar },
-                    headers: { 'Content-Type': 'application/json; charset=utf-8' }
-                })
-               .success(function (data) {
-                   $scope.erroBusca = 0;
-                   if (data == '') {
-                       $scope.erroBusca = 1;
-                   }
-                   $scope.ListarDocumentos();
-               }).error(function (data) {
-                   $scope.erroBusca = 1;
-                   $scope.exibirCarregando = false;
-               });
-            }
-        }
 
-        $scope.Expurgar = function () {
-            if (confirm('Deseja realmente Expurgar os documentos?')) {
-                $scope.exibirCarregando = true;
-                var listaDocumentosExpurgar = new Array();
-                for (var i = 0; i < $scope.Documentos.length; i++) {
-                    if ($scope.Documentos[i].Selecionado) {
-                        listaDocumentosExpurgar.push($scope.Documentos[i].IdDocumento);
-                    }
-                }
-                $http({
-                    method: 'POST',
-                    url: '@urlExpurgar',
-                    data: { ListaDocumentos: listaDocumentosExpurgar },
-                    headers: { 'Content-Type': 'application/json; charset=utf-8' }
-                })
-               .success(function (data) {
-                   $scope.erroBusca = 0;
-                   if (data == '') {
-                       $scope.erroBusca = 1;
-                   }                   
-                   $scope.ListarDocumentos();
-               }).error(function (data) {
-                   $scope.erroBusca = 1;
-                   $scope.exibirCarregando = false;
-               });
-            }
-        }
-
-        $scope.zerarPesquisa = function () {
-            $scope.Documentos = null;
-        }
 
         $scope.ListarDocumentos = function () {
             $scope.exibirCarregando = true;
-            $scope.Documentos = null;
-            var dictionary = {};
-            var listaImputs = document.getElementsByClassName('descritor');
-            for (var i = 0; i < listaImputs.length; i++) {
-                dictionary[listaImputs[i].id] = listaImputs[i].value;
-            }
-            if (dictionary == null || dictionary == '') {
-                dictionary[0] = '';
-            }
-
             $http({
                 method: 'POST',
                 url: '@urlListarDocumentos',
                 data: {
+                    idMantenedora: $scope.MantenedoraSelecionada,
                     idCliente: $scope.ClienteSelecionado,
-                    idSetor: $scope.SetorSelecionado,
-                    Ano: $scope.anoSelecionado,
-                    ModoPesquisa : $scope.modoPesquisa
+                    idSetor: $scope.SetorSelecionado
                 },
                 headers: { 'Content-Type': 'application/json; charset=utf-8' }
             })
@@ -182,39 +113,46 @@
                 if (data == '') {
                     $scope.erroBusca = 1;
                 }
-                $scope.Documentos = data;
+                $scope.ListaDocumentos = data;
                 $scope.exibirCarregando = false;
             }).error(function (data) {
                 $scope.erroBusca = 1;
-                $scope.Documentos = null;
+                $scope.ListaDocumentos = null;
                 console.log(data);
                 $scope.exibirCarregando = false;
             });
         };
 
+        $scope.devolverDocumentoNaOS = function (idDocumento) {
+            $scope.exibirCarregando = true;
+            var varIdDocumento = idDocumento;
+            $http({
+                method: 'POST',
+                url: '@urlDevolverOS',
+                data: { id: varIdDocumento },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                alert("Adicionada a OS!");
+                $rootScope.$broadcast('atualizar');
+                $scope.exibirCarregando = false;
+            }).error(function (data) {
+                alert("Erro ao adicionar a OS");
+                $scope.exibirCarregando = false;
+            });
+        };
 
     };
 
 </script>
 
-<div class="widget-box" ng-controller="RelatorioController">
+<div class="widget-box" ng-controller="ListagemController">
     <div class="widget-header">
-        <h4 class="widget-title">Relatório de expurgo</h4>
+        <h4 class="widget-title">Visualizar Documentos Emprestados</h4>
     </div>
     <div class="widget-body">
         <div class="widget-main">
             <div>
-                <div class="row">
-                    <div class="col-xs-12 col-sm-6">
-                        <label class="control-label">Modo Pesquisa</label>
-                        <select class="form-control" ng-model="modoPesquisa" ng-change="zerarPesquisa()">
-                            <option value="1">Listar documentos Para expurgo</option>
-                            <option value="2">Listar documentos Aprovados para Expurgo pelo cliente</option>
-                        </select>
-
-                    </div>
-                </div>
-                <br />
                 <div class="row">
                     <div class="col-xs-12 col-sm-3">
                         <label class="control-label">Mantenedora</label>
@@ -222,6 +160,7 @@
                             <option value="">[ Selecione ]</option>
                         </select>
                     </div>
+
                     <div class="col-xs-12 col-sm-3">
                         <label class="control-label">Cliente</label>
                         <select class="form-control" ng-disabled="Clientes == null" ng-change="loadSetores()" ng-model="ClienteSelecionado" ng-options="item.IdCliente as item.NomeCliente for item in Clientes">
@@ -234,41 +173,35 @@
                             <option value="">[ Selecione ]</option>
                         </select>
                     </div>
-                    <div class="col-xs-12 col-sm-3" ng-show="modoPesquisa == 1">
-                        <label class="control-label">Ano Referência</label>
-                        <input type="text" class="form-control" ng-model="anoSelecionado" />
-                    </div>
+
+
                 </div>
                 <br />
                 <div class="row right">
                     <div class="col-xs-6 col-sm-3">
-                        <input type="button" id="btnPesquisa" ng-click="ListarDocumentos()" value="Pesquisar" class="btn btn-primary" />
+                        <input type="button" id="btnPesquisa" ng-click="ListarDocumentos()" value="Listar" class="btn btn-primary" />
                     </div>
-                    <div class="col-xs-6 col-sm-4" ng-show="modoPesquisa == 1">
-                        <input type="button" id="btnEnviarAprovacao" ng-click="EnviarAprovacao()" value="Enviar Selecionados para Aprovação de Expurgo" class="btn btn-sucess" />
-                    </div>
-                    <div class="col-xs-6 col-sm-2" ng-show="modoPesquisa == 2">
-                        <input type="button" ng-click="Expurgar()" value="Expurgar documentos" class="btn btn-danger" />
-                    </div>
+
                     <div class="col-xs-6 col-sm-3">
-                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-pulse fa-spinner"></i> Carregando Dados </span>
+                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spin fa-spinner"></i> Carregando Dados </span>
                     </div>
+
                 </div>
 
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-12 col-sm-12" id="replacetarget">
-            <div ng-hide="Documentos == null" class="panel panel-default">
+        <div class="col-xs-12 col-sm-12">
+            <div ng-hide="ListaDocumentos == null" class="panel panel-default">
                 <div class="panel-heading">
-                    <strong>Relatório</strong>
+                    <strong>Listagem</strong>
                 </div>
                 <div id="divDocumentos">
                     <table class="table">
                         <tbody>
-                            <tr><th>#</th><th>Descrição</th><th>Tipo</th><th>Data</th><th>Observação</th><th style="width: 80px">Ações</th></tr>
-                            <tr ng-repeat="doc in Documentos" ng-class="doc.CssTelaPesquisa">
+                            <tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width: 80px">Ações</th></tr>
+                            <tr ng-repeat="doc in ListaDocumentos" ng-class="doc.CssTelaPesquisa">
                                 <td>
                                     <div>
                                         Caixa = <strong>{{doc.NumeroCaixa}}</strong>
@@ -285,14 +218,12 @@
                                     <br />
                                 </td>
                                 <td>{{doc.DescricaoTipoDocumento}} </td>
-                                <td>{{doc.DataDocumento}} </td>
-                                <td>
-                                    <div ng-show="doc.JaFoiMarcadoParaExpurgo && modoPesquisa == 1">Aguardando Aprovação para Expurgo</div>
-                                    <div ng-show="modoPesquisa == 2">{{doc.DetalheExpurgoDocumento}}</div>
-                                </td>
                                 <td style="white-space: nowrap;" class="grid-cell action-buttons">
-                                    <input type="checkbox" ng-model="doc.Selecionado" class="form-control" ng-hide="doc.JaFoiMarcadoParaExpurgo" />
-                                    <input type="checkbox" ng-model="doc.Selecionado" class="form-control" ng-show="modoPesquisa == 2" />
+                                    <span ng-hide="doc.EmprestadoCom == ''">{{doc.EmprestadoCom}} </span>
+                                    <input ng-hide="doc.EmprestadoCom != ''" ng-click="incluirDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Incluir na OS" value="Incluir na OS" data-original-title="Incluir na OS" />
+                                    <input ng-hide="doc.EmprestadoCom == ''" ng-click="devolverDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Devolver Documento" value="Devolver Documento" data-original-title="Devolver Documento" />
+                                    <a ng-hide="permissaoFull == true" class="blue ace-icon fa fa-search-plus bigger-140" href="" title="Visualizar"> </a>
+                                    <a ng-hide="doc.TemAnexo == false" class="red ace-icon fa fa-paperclip bigger-140" href="@urlDonwloadFile/{{doc.IdDocumento}}" target="_blank" title="Anexo"> </a>
                                 </td>
                             </tr>
 

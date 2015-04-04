@@ -1,0 +1,138 @@
+﻿@using SIGA.Entities.Models;
+@using System.Linq;
+@{
+    ViewBag.Title = "Visualizar Documentos Expurgo";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = Url.Content("~/SIGA/Documentos/ListarDocumentosParaExpurgo");
+    List<Documento> documentos = ViewBag.Documentos as List<Documento>;
+    List<Setor> setores = ViewBag.Setores as List<Setor>;
+    SIGA.Data.Business.DocumentoBusiness documentoBusiness = new SIGA.Data.Business.DocumentoBusiness();
+
+    var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
+    var urlDonwloadFile = Url.Content("~/SIGA/Documentos/DownloadFile");
+    var urlAprovarExpurgo = Url.Content("~/SIGA/Documentos/AprovarExpurgo");
+
+}
+
+<script type="text/javascript">
+
+
+    var ListagemController = function ($scope, $http, $rootScope) {
+
+        // inicializa a variavel com todas as mantenedoras
+        $scope.init = function () {
+            $scope.permissaoFull = '@permissaoFull';
+            $scope.exibirCarregando = false;
+
+            $http({
+                method: 'POST',
+                url: '@url',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.ListaDocumentos = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.ListaDocumentos = null;
+            });
+
+        };
+       
+        $scope.AprovarParaExpurgo = function () {
+            $scope.exibirCarregando = true;
+            var listaDocumentosExpurgar = new Array();
+            for (var i = 0; i < $scope.ListaDocumentos.length; i++) {
+                if ($scope.ListaDocumentos[i].Selecionado) {
+                    listaDocumentosExpurgar.push($scope.ListaDocumentos[i].IdDocumento);
+                }
+            }
+            $http({
+                method: 'POST',
+                url: '@urlAprovarExpurgo',
+                data: { ListaDocumentos : listaDocumentosExpurgar },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                alert("Documentos Enviados para Expurgo!");
+                $scope.init();
+            }).error(function (data) {
+                alert("Erro ao Enviar para expurgo");
+                $scope.exibirCarregando = false;
+            });
+        };
+
+    };
+
+</script>
+
+<div class="widget-box" ng-controller="ListagemController">
+    <div class="widget-header">
+        <h4 class="widget-title">Visualizar Documentos Para Expurgo</h4>
+    </div>
+    <div class="widget-body" ng-init="init()">
+        <div class="widget-main">
+            <div>             
+                <div class="row right">
+                    <div class="col-xs-6 col-sm-3">
+                        <input type="button" ng-click="AprovarParaExpurgo()" value="Aprovar Documentos Selecionados" class="btn btn-primary" />
+                    </div>
+                    <div class="col-xs-6 col-sm-3">
+                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spin fa-spinner"></i> Carregando Dados </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-12">
+            <div ng-hide="ListaDocumentos == null" class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Listagem</strong>
+                </div>
+                <div id="divDocumentos">
+                    <table class="table">
+                        <tbody>
+                            <tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width: 80px">Ações</th><th>Selecionar</th></tr>
+                            <tr ng-repeat="doc in ListaDocumentos" ng-class="doc.CssTelaPesquisa">
+                                <td>
+                                    <div>
+                                        Caixa = <strong>{{doc.NumeroCaixa}}</strong>
+                                    </div>
+                                    <div>
+                                        Lote = <strong>{{doc.NumeroLote}}</strong>
+                                    </div>
+                                    <div>
+                                        Sequencial = <strong>{{doc.SequencialDocumentoLote}}</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div ng-repeat="desc in doc.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
+                                    <br />
+                                </td>
+                                <td>{{doc.DescricaoTipoDocumento}} </td>
+                                <td style="white-space: nowrap;" class="grid-cell action-buttons">
+                                    <span ng-hide="doc.EmprestadoCom == ''">{{doc.EmprestadoCom}} </span>
+                                    <a ng-hide="doc.TemAnexo == false" class="red ace-icon fa fa-paperclip bigger-140" href="@urlDonwloadFile/{{doc.IdDocumento}}" target="_blank" title="Anexo"> </a>
+                                </td>
+                                <td>
+                                    <input type="checkbox" ng-model="doc.Selecionado" class="form-control" />
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+                <br />
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
