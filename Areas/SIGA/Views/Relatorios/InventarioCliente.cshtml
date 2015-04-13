@@ -1,5 +1,6 @@
 ﻿@using SIGA.Entities.Models;
 @using System.Linq;
+@using SIGA.Data.Business.Models;
 @{
     ViewBag.Title = "Relatorio de Inventario do Cliente";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -13,185 +14,23 @@
     var urlListarDocumentos = Url.Content("~/SIGA/Relatorios/RecuperarListaDocumentosInventario");
 
     var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
-    
+
+    IList<string> listaDocs = new List<string>();
+
+
+    foreach (DocumentoDTO item in (List<DocumentoDTO>)ViewData["ListaDocumento"])
+    {
+        listaDocs.Add(Json.Encode(item));
+    }
+
 }
+@section scripts{
+    <script type="text/javascript" src="http://w2ui.com/src/w2ui-1.4.2.min.js"></script>
+    <script src="@Url.Content("~/Scripts/Pivot/pivot.js")" type="text/javascript"></script>
+    <script src="~/Scripts/angularGrid-1.2.js"></script>
+    <script src="~/Content/js/RelatorioInventario.js"></script>
 
-<script type="text/javascript">
-    
-    
-
-    var RelatorioController = function ($scope, $http) {
-       
-        // inicializa a variavel com todas as mantenedoras
-        $scope.init = function () {
-            $scope.SetorAtual = "";
-            $scope.permissaoFull = '@permissaoFull';
-            $scope.exibirCarregando = false;
-
-            $scope.Clientes = null;
-            $scope.Descritores = null;
-            $http({
-                method: 'POST',
-                url: '@urlMantenedoras',
-                headers: { 'Content-Type': 'application/json; charset=utf-8' }
-            })
-            .success(function (data) {
-                $scope.erroBusca = 0;
-                if (data == '') {
-                    $scope.erroBusca = 1;
-                }
-                $scope.Mantenedoras = data;
-            }).error(function (data) {
-                $scope.erroBusca = 1;
-                $scope.Mantenedoras = null;
-            });
-
-        };
-
-        $scope.loadClientes = function () {
-            $scope.Setores = null;
-            $scope.TiposDocumento = null;
-            $scope.Descritores = null;
-            $http({
-                method: 'POST',
-                url: '@urlClientes',
-                data: { idMantenedora: $scope.MantenedoraSelecionada },
-                headers: { 'Content-Type': 'application/json; charset=utf-8' }
-            })
-            .success(function (data) {
-                $scope.erroBusca = 0;
-                if (data == '') {
-                    $scope.erroBusca = 1;
-                }
-                $scope.Clientes = data;
-            }).error(function (data) {
-                $scope.erroBusca = 1;
-                $scope.Clientes = null;
-            });
-        };
-
-        $scope.loadSetores = function () {
-            $scope.TiposDocumento = null;
-            $scope.Descritores = null;
-            $http({
-                method: 'POST',
-                url: '@url',
-                data: { idCliente: $scope.ClienteSelecionado },
-                headers: { 'Content-Type': 'application/json; charset=utf-8' }
-            })
-            .success(function (data) {
-                $scope.erroBusca = 0;
-                if (data == '') {
-                    $scope.erroBusca = 1;
-                }
-                $scope.Setores = data;
-            }).error(function (data) {
-                $scope.erroBusca = 1;
-                $scope.Setores = null;
-            });
-        };
-
-        $scope.ListarDocumentos = function () {
-            $scope.SetorAtual = "";
-            $scope.exibirCarregando = true;
-            $scope.Documentos = null;
-            var setor = 0;
-            if ($scope.SetorSelecionado > 0) {
-                setor = $scope.SetorSelecionado;
-            }
-            var dictionary = {};
-            var listaImputs = document.getElementsByClassName('descritor');
-            for (var i = 0; i < listaImputs.length; i++) {
-                dictionary[listaImputs[i].id] = listaImputs[i].value;
-            }
-            if (dictionary == null || dictionary == '') {
-                dictionary[0] = '';
-            }
-
-            $http({
-                method: 'POST',
-                url: '@urlListarDocumentos',
-                data: {
-                    idCliente: $scope.ClienteSelecionado,
-                    idSetor: setor
-                },
-                headers: { 'Content-Type': 'application/json; charset=utf-8' }
-            })
-            .success(function (data) {
-                console.log('entrou sucesso');
-                $scope.erroBusca = 0;
-                if (data == '') {
-                    $scope.erroBusca = 1;
-                }
-                $scope.Documentos = data;
-                
-                $scope.exibirCarregando = false;
-            }).error(function (data) {
-                $scope.erroBusca = 1;
-                $scope.Documentos = null;
-                console.log(data);
-                $scope.exibirCarregando = false;
-            });
-        };
-
-       
-        var filtrarSetores = {};
-        $scope.setoresParaFiltrar = function () {
-            filtrarSetores = {};
-            for (var i = 0 ; i < $scope.Documentos.length ; i++) {
-                var o = filtrarSetores[$scope.Documentos[i].NomeSetor];
-                if (!o) {
-                    filtrarSetores[$scope.Documentos[i].NomeSetor] = o = [];
-                }
-                o.push($scope.Documentos[i].NomeSetor)
-            }
-            return filtrarSetores;
-            //return $scope.Documentos;
-        }
-
-
-        $scope.filtrarSetor = function (setor) {
-            setorEhNovo = filtrarSetores.indexOf(setor) < 0;
-            if (setorEhNovo) {
-                filtrarSetores.push(setor);
-                console.log(setorEhNovo);
-
-            }
-            console.log(filtrarSetores);
-            return setorEhNovo;
-        }
-
-      
-        // -------------------------------------------------------
-        // Grid
-        var module = angular.module("RelatorioController", ["angularGrid"]);
-
-        module.controller("RelatorioController", function ($scope) {
-
-            var columnDefs = [
-                { displayName: "Make", field: "make" },
-                { displayName: "Model", field: "model" },
-                { displayName: "Price", field: "price" }
-            ];
-
-            var rowData = [
-                { make: "Toyota", model: "Celica", price: 35000 },
-                { make: "Ford", model: "Mondeo", price: 32000 },
-                { make: "Porsche", model: "Boxter", price: 72000 }
-            ];
-
-            $scope.gridOptions = {
-                columnDefs: columnDefs,
-                rowData: rowData,
-                dontUseScrolls: true // because so little data, no need to use scroll bars
-            };
-
-        });
-
-    };
-
-
-</script>
+}
 
 <div class="widget-box" ng-controller="RelatorioController">
     <div class="widget-header">
@@ -225,9 +64,10 @@
                 <div class="row right">
                     <div class="col-xs-6 col-sm-6">
                         <input type="button" id="btnPesquisa" ng-click="ListarDocumentos()" value="Pesquisar" class="btn btn-primary" />
+
                     </div>
                     <div class="col-xs-6 col-sm-6">
-                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-pulse fa-spinner"></i> Carregando Dados </span>
+                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spin fa-spinner"></i> Carregando Dados </span>
                     </div>
                 </div>
 
@@ -238,56 +78,32 @@
         <div class="col-xs-12 col-sm-12" id="replacetarget">
             <div ng-hide="Documentos == null" class="panel panel-default">
                 <div class="panel-heading">
-                    <strong>Relatório</strong>
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <strong>Relatório</strong>
+                        </div>
+                        <div class="col-lg-3">
+
+                            <span>Agrupar por</span>
+                            <select ng-model="groupBy" ng-change="onGroupByChanged()">
+                                <option value="">[Nenhum]</option>
+                                <option value="NomeCliente">Cliente</option>
+                                <option value="NomeSetor">Setor</option>
+                                <option value="NomeCliente,NomeSetor">Cliente, Setor</option>
+                                <option value="NomeCliente,NumeroCaixaCliente">Cliente, Caixa</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-6">
+
+                            <input class="form-control" placeholder="Digite aqui para Filtrar... " type="text" ng-model="gridOptions.quickFilterText" />
+                        </div>
+                    </div>
                 </div>
-                <div id="divDocumentos">
-
-                    <div angular-grid="gridOptions" class="ag-fresh"></div>
-
-
-                    @*<div ng-repeat="docs in setoresParaFiltrar() | filter:filtrarSetor ">
-                        <h3>{{docs.NomeSetor}}</h3>
-                        <table class="table">
-                            <tbody>
-                                <tr><th>Setor</th><th>#</th><th>Descrição</th><th>Tipo</th><th>Data</th><th style="width: 80px">Ações</th></tr>
-                                <tr ng-repeat="doc in Documentos | filter: {NomeSetor: docs.NomeSetor}">
-                                    <td>{{doc.NomeSetor}}</td>
-                                    <td>
-                                        <div>
-                                            Caixa = <strong>{{doc.NumeroCaixa}}</strong>
-                                        </div>
-                                        <div>
-                                            Lote = <strong>{{doc.NumeroLote}}</strong>
-                                        </div>
-                                        <div>
-                                            Sequencial = <strong>{{doc.SequencialDocumentoLote}}</strong>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div ng-repeat="desc in doc.Descritores">{{desc.NomeDescritor}} - <strong>{{desc.ValorDescritor}}</strong> </div>
-                                        <br />
-                                    </td>
-                                    <td>{{doc.DescricaoTipoDocumento}} </td>
-                                    <td>{{doc.DataDocumento}} </td>
-                                    <td style="white-space: nowrap;" class="grid-cell action-buttons"></td>
-
-                                </tr>
-
-                            </tbody>
-                        </table>
-
-                    </div>*@
-
-
-                    
-
-                </div>
+                <div angular-grid="gridOptions" class="ag-fresh" style="width:100%; height:800px"></div>
                 <br />
-               
 
             </div>
 
         </div>
     </div>
 </div>
-

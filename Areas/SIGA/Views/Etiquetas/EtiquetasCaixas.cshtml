@@ -89,59 +89,77 @@
         </div>
         <div class="widget-body">
             <div class="widget-main">
-                <div>
-                    <div class="row">
-                        <div class="col-xs-6 col-sm-4">
-                            <label class="control-label">Cliente</label>
-                            @Html.DropDownListFor(p => p.idCliente, (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new { @id = "IdClienteTipoDocumento", @class = "form-control" })
-                        </div>
-                        <div class="col-xs-6 col-sm-4">
-                            <label class="control-label">Setor</label>
-                            @Html.DropDownListFor(p => p.idSetor, (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new { @id = "idSetorTipoDocumento", @class = "form-control" })
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-6">
+                                <label class="control-label">Cliente</label>
+                                @Html.DropDownListFor(p => p.idCliente, (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new { @id = "IdClienteTipoDocumento", @class = "form-control" })
+                            </div>
+                            <div class="col-xs-6 col-sm-6">
+                                <label class="control-label">Setor</label>
+                                @Html.DropDownListFor(p => p.idSetor, (SelectList)@ViewBag.IdCliente, "[ Selecione ]", new { @id = "idSetorTipoDocumento", @class = "form-control" })
 
+                            </div>
+                           
                         </div>
-                        <div class="col-xs-6 col-sm-4">
+                        <div class="row">
+                            <div class="col-xs-6 col-sm-6">
+                                <label class="control-label">Caixa Inicial</label>
+                                @Html.TextBoxFor(p => p.CaixaInicial, new { @class = "form-control" })
+                            </div>
+                            <div class="col-xs-6 col-sm-6">
+                                <label class="control-label">Caixa Final</label>
+                                @Html.TextBoxFor(p => p.CaixaFinal, new { @class = "form-control" })
+                            </div>
+                          
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-12">
+                                <div class="panel panel-default">
 
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-6 col-sm-4">
-                            <label class="control-label">Caixa Inicial</label>
-                            @Html.TextBoxFor(p => p.CaixaInicial, new { @class = "form-control" })
-                        </div>
-                        <div class="col-xs-6 col-sm-4">
-                            <label class="control-label">Caixa Final</label>
-                            @Html.TextBoxFor(p => p.CaixaFinal, new { @class = "form-control" })
-                        </div>
-                        <div class="col-xs-6 col-sm-4">
-
-                        </div>
-                    </div>
-                    <br />
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-8">
-                            <div class="panel panel-default" >
-
-                                <div class="panel-body">
-                                    @Html.CheckBoxFor(p => p.CriarCaixas)
-                                    <span>Criar Caixas?</span>
-                                    <div class="alert alert-info">
-                                        <span>Opção usada para criar as caixas no momento da impressão das etiquetas.</span>
+                                    <div class="panel-body">
+                                        @Html.CheckBoxFor(p => p.CriarCaixas)
+                                        <span>Criar Caixas?</span>
+                                        <div class="alert alert-info">
+                                            <span>Opção usada para criar as caixas no momento da impressão das etiquetas.</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <br />
+                        <div class="row right">
+                            <div class="col-xs-6 col-sm-12">
+                                <input type="submit" id="btnGerarEtiquetas" value="Gerar Etiquetas" class="btn btn-primary" />
+
+                            </div>
+                        </div>
                     </div>
+                    <div class="col-lg-4"><br />
+                        <div class="panel panel-success">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Resumo cliente</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row" >
+                                    Cliente: Nome do cliente
+                                </div>
+                                <div class="row">
+                                    Quantidade de caixas Geradas: 2345
+                                    <br />
+                                    Primeira Caixa: 1
+                                    <br />
+                                    Ultima Caixa: 12534
+                                </div>
 
-                    <br />
-                    <div class="row right">
-                        <div class="col-xs-6 col-sm-12">
-                            <input type="submit" id="btnGerarEtiquetas" value="Gerar Etiquetas" class="btn btn-primary" />
 
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
 
