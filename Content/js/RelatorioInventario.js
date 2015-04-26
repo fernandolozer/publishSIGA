@@ -41,7 +41,11 @@ module.controller('RelatorioController', function ($scope, $http) {
 
         $scope.Clientes = null;
         $scope.Descritores = null;
-        $http.get('/SIGA/Documentos/GetTodasMantenedoras')
+        $http({
+            method: 'GET',
+            url: '/SIGA/Documentos/GetTodasMantenedoras',
+            headers: { 'Content-Type': 'application/json; charset=utf-8' }
+        })        
         .success(function (data) {
             $scope.erroBusca = 0;
             if (data == '') {
