@@ -31,7 +31,7 @@
             $scope.Clientes = null;
             $scope.Descritores = null;
             $http({
-                method: 'POST',
+                method: 'GET',
                 url: '@urlMantenedoras',
                 headers: { 'Content-Type': 'application/json; charset=utf-8' }
             })
