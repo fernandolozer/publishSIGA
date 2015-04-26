@@ -3,7 +3,7 @@
 @using SIGA.Data.Business.Models;
 @{
     ViewBag.Title = "Relatorio de Inventario do Cliente";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_LayoutRelatorioInventario.cshtml";
     var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
     List<Documento> documentos = ViewBag.Documentos as List<Documento>;
     List<Setor> setores = ViewBag.Setores as List<Setor>;
@@ -29,7 +29,7 @@
     <script src="~/Content/js/RelatorioInventario.js"></script>
 }
 
-<div class="widget-box" ng-controller="RelatorioController">
+<div class="widget-box" ng-app="inventario" ng-controller="RelatorioController">
     <div class="widget-header">
         <h4 class="widget-title">Relatório de Inventario</h4>
     </div>

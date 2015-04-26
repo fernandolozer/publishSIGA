@@ -1,10 +1,10 @@
-﻿var app = angular.module('app', []);
+﻿var app = angular.module('inventario', []);
 
-var module = angular.module("app", ["angularGrid"]);
+var module = angular.module('inventario', ['angularGrid']);
 
 /*Funções referentes ao Grid*/
 
-module.controller("RelatorioController", function ($scope, $http) {
+module.controller('RelatorioController', function ($scope, $http) {
 
     var columnDefs = [
         { displayName: "Cliente", field: "NomeCliente" },
