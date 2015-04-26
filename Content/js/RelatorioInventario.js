@@ -1,6 +1,6 @@
-﻿var app = angular.module('inventario', []);
+﻿var app = angular.module('app', []);
 
-var module = angular.module('inventario', ['angularGrid']);
+var module = angular.module('app', ['angularGrid']);
 
 /*Funções referentes ao Grid*/
 
