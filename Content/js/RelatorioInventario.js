@@ -43,7 +43,7 @@ module.controller('RelatorioController', function ($scope, $http) {
         $scope.Descritores = null;
         $http({
             method: 'GET',
-            url: '/SIGA/Documentos/GetTodasMantenedoras',
+            url: '~/SIGA/Documentos/GetTodasMantenedoras',
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         })        
         .success(function (data) {
@@ -65,7 +65,7 @@ module.controller('RelatorioController', function ($scope, $http) {
         $scope.Descritores = null;
         $http({
             method: 'POST',
-            url: '/SIGA/Documentos/GetClientesMantenedora',
+            url: '~/SIGA/Documentos/GetClientesMantenedora',
             data: { idMantenedora: $scope.MantenedoraSelecionada },
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         })
@@ -86,7 +86,7 @@ module.controller('RelatorioController', function ($scope, $http) {
         $scope.Descritores = null;
         $http({
             method: 'POST',
-            url: '/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente',
+            url: '~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente',
             data: { idCliente: $scope.ClienteSelecionado },
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         })
@@ -121,7 +121,7 @@ module.controller('RelatorioController', function ($scope, $http) {
 
         $http({
             method: 'POST',
-            url: '/SIGA/Relatorios/RecuperarListaDocumentosInventario',
+            url: '~/SIGA/Relatorios/RecuperarListaDocumentosInventario',
             data: {
                 idMantenedora: $scope.MantenedoraSelecionada,
                 idCliente: $scope.ClienteSelecionado,
