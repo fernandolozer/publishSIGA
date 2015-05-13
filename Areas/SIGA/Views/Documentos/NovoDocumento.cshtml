@@ -128,7 +128,9 @@
         $("#divDescritores").on("keypress", "input", function () {
             if (event.which == 13) {
                 event.preventDefault();
-                SalvaDocumento();
+                if ($('#btnSalvarContinuar').is(':enabled')) {
+                    SalvaDocumento();
+                }
             }
         });
 
@@ -442,7 +444,9 @@
 
         // para inserir documentos
         function SalvaDocumento() {
-           
+            $('#btnSalvarContinuar').attr("disabled", true);
+            $('#btnSalvarContinuar').attr("value", 'Salvando... ');
+
             
             EsconderMensagemErro();
             var varidCliente = $("#IdClienteTipoDocumento").val();
@@ -485,6 +489,10 @@
                     ExibirMensagemErro("Erro no preenchimento dos campos", 'Favor Preencher corretamente todos os campos. <br/>  - Verifique se os descritores Obrigatórios estão preenchidos.<br/>  - Verifique se a Data do Documento não é maior que a data de hoje.');
                 }
             });
+
+            $('#btnSalvarContinuar').attr("disabled", false);
+            $('#btnSalvarContinuar').attr("value", 'Salvar/Continuar');
+
            
         }
 

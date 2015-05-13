@@ -45,7 +45,7 @@ module.controller('RelatorioController', ['$scope', '$http', function ($scope, $
         $scope.Clientes = null;
         $scope.Descritores = null;
         $http({
-            method: 'POST',
+            method: 'GET',
             url: '/SIGA/Documentos/GetTodasMantenedoras',
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         })        
