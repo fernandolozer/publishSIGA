@@ -172,15 +172,27 @@
         };
 
         $("#btnSalvarContinuar").click(function () {
+            $('#btnSalvarContinuar').attr("disabled", true);
+            $('#btnSalvarContinuar').attr("value", 'Salvando... ');
             SalvaDocumento();
+            $('#btnSalvarContinuar').attr("disabled", false);
+            $('#btnSalvarContinuar').attr("value", 'Salvar/Continuar');
         });
 
         $("#btnNovoLote").click(function () {
+            $('#btnNovoLote').attr("disabled", true);
+            $('#btnNovoLote').attr("value", 'Salvando... ');
             CriaNovoLote();
+            $('#btnNovoLote').attr("disabled", false);
+            $('#btnNovoLote').attr("value", 'Novo Lote');
         });
 
         $("#btnNovaCaixa").click(function () {
+            $('#btnNovaCaixa').attr("disabled", true);
+            $('#btnNovaCaixa').attr("value", 'Salvando... ');
             CriaNovaCaixa();
+            $('#btnNovaCaixa').attr("disabled", false);
+            $('#btnNovaCaixa').attr("value", 'Nova Caixa');
         });
 
 
@@ -399,7 +411,7 @@
             });
 
             ajaxRequest.done(function (xhr, textStatus) {
-                alert('Upload Efetuado com sucesso. ');
+               // alert('Upload Efetuado com sucesso. ');
             });
 
             @*var formData = new FormData($("#txtUploadFile")[0]);
@@ -430,6 +442,8 @@
 
         // para inserir documentos
         function SalvaDocumento() {
+           
+            
             EsconderMensagemErro();
             var varidCliente = $("#IdClienteTipoDocumento").val();
             var varIdDocumento = $("#idDocumentoEmEdicao").val();
@@ -471,7 +485,7 @@
                     ExibirMensagemErro("Erro no preenchimento dos campos", 'Favor Preencher corretamente todos os campos. <br/>  - Verifique se os descritores Obrigatórios estão preenchidos.<br/>  - Verifique se a Data do Documento não é maior que a data de hoje.');
                 }
             });
-
+           
         }
 
         $("#btnLimpar").click(function () {

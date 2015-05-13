@@ -4,7 +4,10 @@ var module = angular.module('app', ['angularGrid']);
 
 /*Funções referentes ao Grid*/
 
-module.controller('RelatorioController', function ($scope, $http) {
+
+module.controller('RelatorioController', ['$scope', '$http', function ($scope, $http) {
+
+//module.controller('RelatorioController', function ($scope, $http) {
 
     var columnDefs = [
         { displayName: "Cliente", field: "NomeCliente" },
@@ -42,8 +45,8 @@ module.controller('RelatorioController', function ($scope, $http) {
         $scope.Clientes = null;
         $scope.Descritores = null;
         $http({
-            method: 'GET',
-            url: '~/SIGA/Documentos/GetTodasMantenedoras',
+            method: 'POST',
+            url: '/SIGA/Documentos/GetTodasMantenedoras',
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         })        
         .success(function (data) {
@@ -65,7 +68,7 @@ module.controller('RelatorioController', function ($scope, $http) {
         $scope.Descritores = null;
         $http({
             method: 'POST',
-            url: '~/SIGA/Documentos/GetClientesMantenedora',
+            url: '/SIGA/Documentos/GetClientesMantenedora',
             data: { idMantenedora: $scope.MantenedoraSelecionada },
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         })
@@ -86,7 +89,7 @@ module.controller('RelatorioController', function ($scope, $http) {
         $scope.Descritores = null;
         $http({
             method: 'POST',
-            url: '~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente',
+            url: '/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente',
             data: { idCliente: $scope.ClienteSelecionado },
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         })
@@ -121,7 +124,7 @@ module.controller('RelatorioController', function ($scope, $http) {
 
         $http({
             method: 'POST',
-            url: '~/SIGA/Relatorios/RecuperarListaDocumentosInventario',
+            url: '/SIGA/Relatorios/RecuperarListaDocumentosInventario',
             data: {
                 idMantenedora: $scope.MantenedoraSelecionada,
                 idCliente: $scope.ClienteSelecionado,
@@ -143,6 +146,44 @@ module.controller('RelatorioController', function ($scope, $http) {
             $scope.Documentos = null;
             $scope.exibirCarregando = false;
         });
+    };
+
+    $scope.GetExcelDocumentos = function () {
+        $scope.SetorAtual = "";
+        $scope.exibirCarregando = true;
+        $scope.Documentos = null;
+        var setor = 0;
+        if ($scope.SetorSelecionado > 0) {
+            setor = $scope.SetorSelecionado;
+        }
+        var dictionary = {};
+        var listaImputs = document.getElementsByClassName('descritor');
+        for (var i = 0; i < listaImputs.length; i++) {
+            dictionary[listaImputs[i].id] = listaImputs[i].value;
+        }
+        if (dictionary == null || dictionary == '') {
+            dictionary[0] = '';
+        }
+
+        $http({
+            method: 'POST',
+            url: '/SIGA/Relatorios/RecuperarListaDocumentosInventarioExcel',
+            data: {
+                idMantenedora: $scope.MantenedoraSelecionada,
+                idCliente: $scope.ClienteSelecionado,
+                idSetor: setor
+            },
+            headers: { 'Content-Type': 'application/json; charset=utf-8' }
+        })
+        .success(function (data) {                      
+            $scope.exibirCarregando = false;
+        }).error(function (data) {
+            $scope.erroBusca = 1;            
+            $scope.exibirCarregando = false;
+            alert(data);
+        });
+        $scope.exibirCarregando = false;
+
     };
 
     $scope.onGroupByChanged = function () {
@@ -201,5 +242,5 @@ module.controller('RelatorioController', function ($scope, $http) {
 
 
 }
-//]
+]
 );
