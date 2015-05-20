@@ -103,6 +103,18 @@ module.controller('RelatorioController', ['$scope', '$http', function ($scope, $
             $scope.erroBusca = 1;
             $scope.Setores = null;
         });
+
+        $http({
+            method: 'GET',
+            url: '/SIGA/Clientes/GetDetalheCliente?idCliente=' + $scope.ClienteSelecionado
+        })
+        .success(function (data) {
+            console.log(data);
+            $scope.DadosCliente = data;
+        }).error(function (data) {
+            $scope.DadosCliente = null;
+        });
+
     };
 
     $scope.ListarDocumentos = function () {

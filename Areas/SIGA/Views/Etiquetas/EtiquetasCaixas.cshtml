@@ -3,6 +3,7 @@
     ViewBag.Title = "EtiquetasCaixas";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var url = Url.Content("~/SIGA/ClientesTiposDocumentos/CarregaListaDeSetoresDoCliente");
+    var urlDadosClientes = Url.Content("~/SIGA/Clientes/GetDetalheCliente");
     var urlGerarEtiquetas = Url.Content("~/SIGA/Etiquetas/GerarEtiquetasCaixas");
     var idCliente = ViewData["IdCliente"];
     var idsetor = ViewData["IdSetor"];
@@ -38,6 +39,20 @@
 
                     });
                     $('#idSetorTipoDocumento').empty().attr('disabled', false).append(elements);
+                }
+            });
+
+            // obtem os detalhes dos clientes
+            $.ajax({
+                url: '@urlDadosClientes',
+                type: 'GET',
+                data: { idCliente: $(this).val() },
+                datatype: 'json',
+                success: function (data) {
+                    $('#spanNomeCliente').text(data.NomeCliente);
+                    $('#spanQtdCaixas').text(data.quantidadeCaixas);
+                    $('#spanPrimeiraCaixa').text(data.MenorCaixa);
+                    $('#spanUltimaCaixa').text(data.MaiorCaixa);
                 }
             });
         });
@@ -145,14 +160,14 @@
                             </div>
                             <div class="panel-body">
                                 <div class="row" >
-                                    Cliente: Nome do cliente
+                                    Cliente: <span id="spanNomeCliente" ></span>
                                 </div>
                                 <div class="row">
-                                    Quantidade de caixas Geradas: 2345
+                                    Quantidade de caixas Geradas: <span id="spanQtdCaixas"></span>
                                     <br />
-                                    Primeira Caixa: 1
+                                    Primeira Caixa: <span id="spanPrimeiraCaixa"></span>
                                     <br />
-                                    Ultima Caixa: 12534
+                                    Ultima Caixa: <span id="spanUltimaCaixa"></span>
                                 </div>
 
 
