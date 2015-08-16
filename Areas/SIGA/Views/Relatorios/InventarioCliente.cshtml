@@ -50,14 +50,26 @@
                             </select>
                         </div>
                     </div>
-                    <br />
-                    <div class="row right">
-                        <div class="col-xs-1 col-sm-4">
-                            <input type="button" id="btnPesquisa" ng-click="ListarDocumentos()" value="Pesquisar" class="btn btn-primary" />
+                    <div class="row">
+                        <div class="col-xs-12">
+
+                            <label class="control-label">Tipo de Documento</label>
+                            <select class="form-control" ng-disabled="TiposDocumento == null" ng-change="" ng-model="TipoDocumentoSelecionado" ng-options="item.IdTipoDocumento as item.NomeTipoDocumento for item in TiposDocumento">
+                                <option value="">[ Selecione ]</option>
+                            </select>
 
                         </div>
+                    </div>
+                    <br />
+                    <div class="row right">
+
                         <div class="col-xs-1 col-sm-4">
-                            <a href="~/SIGA/Relatorios/RecuperarListaDocumentosInventarioExcel?idMantenedora={{MantenedoraSelecionada}}&idCliente={{ClienteSelecionado}}&idSetor={{SetorSelecionado}}" class="btn btn-primary" target="_blank">Gerar Excel</a>
+                            <a href="~/SIGA/Relatorios/RecuperarListaDocumentosInventarioExcel?idMantenedora={{MantenedoraSelecionada}}&idCliente={{ClienteSelecionado}}&idSetor={{SetorSelecionado}}&idClienteTipoDocumento={{TipoDocumentoSelecionado}}"
+                               class="btn btn-primary"
+                               target="_blank"
+                               ng-disabled="MantenedoraSelecionada == null || ClienteSelecionado == null || SetorSelecionado == null || TipoDocumentoSelecionado == null ">
+                                Gerar Excel
+                            </a>
 
                         </div>
                         <div class="col-xs-6 col-sm-4">

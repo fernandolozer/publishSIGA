@@ -117,6 +117,30 @@ module.controller('RelatorioController', ['$scope', '$http', function ($scope, $
 
     };
 
+    $scope.loadTiposDocumentos = function () {
+        $scope.exibirCarregando = true;
+        $scope.Descritores = null;
+        $http({
+            method: 'POST',
+            url: '/SIGA/Documentos/CarregaListaTiposDocumentosSetor',
+            data: { idSetor: $scope.SetorSelecionado },
+            headers: { 'Content-Type': 'application/json; charset=utf-8' }
+        })
+        .success(function (data) {
+            $scope.erroBusca = 0;
+            if (data == '') {
+                $scope.erroBusca = 1;
+            }
+            $scope.TiposDocumento = data;
+            $scope.exibirCarregando = false;
+        }).error(function (data) {
+
+            $scope.erroBusca = 1;
+            $scope.TiposDocumento = null;
+            $scope.exibirCarregando = false;
+        });
+    };
+
     $scope.ListarDocumentos = function () {
         $scope.SetorAtual = "";
         $scope.exibirCarregando = true;
@@ -168,6 +192,15 @@ module.controller('RelatorioController', ['$scope', '$http', function ($scope, $
         if ($scope.SetorSelecionado > 0) {
             setor = $scope.SetorSelecionado;
         }
+        var tipodocumento = 0;
+        
+        if ($scope.TipoDocumentoSelecionado > 0) {
+            tipodocumento = $scope.TipoDocumentoSelecionado;
+        }
+        else {
+            alert('Atenção : O Tipo de Documento é de preenchimento Obrigatório.');
+            return;
+        }
         var dictionary = {};
         var listaImputs = document.getElementsByClassName('descritor');
         for (var i = 0; i < listaImputs.length; i++) {
@@ -176,14 +209,14 @@ module.controller('RelatorioController', ['$scope', '$http', function ($scope, $
         if (dictionary == null || dictionary == '') {
             dictionary[0] = '';
         }
-
         $http({
             method: 'POST',
             url: '/SIGA/Relatorios/RecuperarListaDocumentosInventarioExcel',
             data: {
                 idMantenedora: $scope.MantenedoraSelecionada,
                 idCliente: $scope.ClienteSelecionado,
-                idSetor: setor
+                idSetor: setor,
+                idClienteTipoDocumento: $scope.TipoDocumentoSelecionado
             },
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         })
