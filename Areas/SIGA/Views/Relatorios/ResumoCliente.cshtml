@@ -118,6 +118,7 @@
 
         $scope.carregarDocumentosLote = function (idLote) {
             $scope.exibirCarregando = true;
+            $scope.ListaDocumentosLote = null;
             $http({
                 url: '@urlDocumentosDoMesmoLote',
                 method: 'POST',
