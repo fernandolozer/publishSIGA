@@ -2,6 +2,7 @@
 @{
     var classe = new SIGA.Data.Business.OrdemServicoBusiness();
     int? existe = classe.VerificaSeExisteOSAberta(User.Identity.GetUserId());
+    string versao = "1.1.0.5";
 }
 
 <!DOCTYPE html>
@@ -126,14 +127,14 @@
 
         };
 
-        
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-      ga('create', 'UA-69421264-1', 'auto');
-      ga('send', 'pageview');
+	  ga('create', 'UA-69421264-1', 'auto');
+	  ga('send', 'pageview');
+
 
     </script>
 
@@ -235,7 +236,7 @@
             <div class="sidebar-shortcuts" id="sidebar-shortcuts">
                 <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
                     <i class="ace-icon fa fa-gears home-icon"></i>
-                    <span class="h6">versão 1.1.0.5</span>
+                    <span class="h6">versão @versao</span>
                 </div>
 
                 <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
