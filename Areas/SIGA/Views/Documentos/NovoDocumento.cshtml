@@ -21,6 +21,9 @@
     var urlObtemCodigoBarras = Url.Content("~/SIGA/Documentos/ObtemCodigoBarras");
     var urlUploadFile = Url.Content("~/SIGA/Documentos/UploadFile");
     var urlDonwloadFile = Url.Content("~/SIGA/Documentos/DownloadFile");
+    var urlRemoveFile = Url.Content("~/SIGA/Documentos/RemoveFile");
+    var urlAssociarDocumentoAnexo = Url.Content("~/SIGA/Documentos/AssociarArquivoADocumento");
+    var urlGetListaAnexosDocumento = Url.Content("~/SIGA/Documentos/GetListaAnexosDocumento");
     var idCliente = ViewData["IdCliente"];
     var idsetor = ViewData["IdSetor"];
     var idTemporalidade = ViewData["IdTemporalidade"];
@@ -32,7 +35,26 @@
 
 <script type="text/javascript">
 
+    function removerItemAnexo(nomeAnexo) {
+        $.ajax({
+            url: '@urlRemoveFile',
+            type: 'POST',
+            data: { nomeArquivo: nomeAnexo },
+            datatype: 'json',
+            success: function (data) {
+                var element = document.querySelectorAll('[data-nomearquivo="' + nomeAnexo + '"]');
+                removeElement(element[0]);
+            }
+        });
+
+    };
+    function removeElement(element) {
+        element && element.parentNode && element.parentNode.removeChild(element);
+    }
+
+
     $(function () {
+        'use strict';
         //Ajax para carregar os setores do cliente
         $("#IdClienteTipoDocumento").change(function () {
             EsconderMensagemErro();
@@ -136,6 +158,7 @@
 
 
         function MontarListaDescritores(data) {
+            var tabela = '';
             $('#divDescritores').html('');
             var classPrimeiro = 'primeiroDescritor';
             tabela = '<div class="panel panel-default"><div class="panel-heading"><strong>Campos do Documento</strong></div><table class="table"><tbody><tr><th>Nome do Descritor</th><th>Valor</th></tr>';
@@ -165,13 +188,115 @@
                 classPrimeiro = '';
             });
             tabela = tabela + '<tr><td class="col-xs-6 col-sm-4"><input class="form-control text-box single-line" data-val="true" readonly="readonly" tabindex="-1" type="text" value="Anexo"></td>';
-            tabela = tabela + '<td> <input type="file" tabIndex="-1" name="UploadFile" id="txtUploadFile" /> </td>';
+            tabela = tabela + '<td> ';
+            tabela = tabela + ' <div id="fileslist" class="files"></div> ';
+            tabela = tabela + ' <div id="progress" class="progress" style="display:none;">  <div class="progress-bar progress-bar-success"></div> </div>';
+
+            tabela = tabela + ' <span class="btn btn-success btn-sm fileinput-button">';
+            tabela = tabela + ' <i class="fa fa-paperclip fa-lg"></i>';
+            tabela = tabela + ' <span>Adicionar Anexo...</span>';
+            tabela = tabela + ' <input id="fileupload" type="file" name="files[]" multiple> </span>';
+            tabela = tabela + ' ';
+            tabela = tabela + ' ';
+            tabela = tabela + ' ';
+            tabela = tabela + ' </td>';
             tabela = tabela + '</tr>';
-
-
             tabela = tabela + '</tbody></table></div>';
             $(tabela).appendTo('#divDescritores');
+            
+            // adiciona metodo para fazer multiplos uploads
+            adicionaFileUpload();
         };
+
+        function adicionaFileUpload() {
+            var urlDownload = '@Url.Content("~/SIGA/Documentos/UploadFiles")';
+            $('#fileupload').fileupload({
+                url: urlDownload,
+                dataType: 'json',
+                autoUpload: true,
+                acceptFileTypes: /(\.|\/)(gif|jpg|jpe?g|png|pdf|doc|docx|xls|xlsx|ppt)$/i,
+                maxFileSize: 15000000
+            }).on('fileuploadadd', function (e, data) {
+
+            }).on('fileuploadprocessalways', function (e, data) {
+                
+                var index = data.index,
+                    file = data.files[index],
+                    node = $(data.context.children()[index]);
+                if (file.preview) {
+                    node
+                        .prepend('<br>')
+                        .prepend(file.preview);
+                }
+                if (file.error) {
+                    node
+                        .append('<br>')
+                        .append($('<span class="text-danger"/>').text(file.error));
+                }
+                //if (index + 1 === data.files.length) {
+                //    data.context.find('button')
+                //        .text('Upload')
+                //        .prop('disabled', !!data.files.error);
+                //}
+            }).on('fileuploadprogressall', function (e, data) {
+
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress .progress-bar').css('width', progress + '%');
+                $('#progress').css('display', 'block');
+            }).on('fileuploaddone', function (e, data) {
+
+                // insere uma lista do arquivo que foi subido para o site.
+                var divArquivos = $('<div/>').appendTo('#fileslist');
+                $.each(data.result.files, function (index, file) {
+
+                    var tamanho = (file.length / 1024);
+                    var node = $('<p data-nomearquivo="' + file.name + '"/>')
+                            .append($('<span/>').text(file.name))
+                            .append($(' <a href="javascript:void(0);"  data-nomedocumento="' + file.name + '" class="btn btn-danger btn-xs pull-right" onclick="removerItemAnexo(this.getAttribute(\'data-nomedocumento\'))"> <i  class="fa fa-times fa-lg"> </i> </a>'))
+                            .append($('<span class="pull-right"/>').text(tamanho.toFixed(2) + ' KB  '))
+                    ;
+
+                    node.appendTo(divArquivos);
+                });
+                //fim da lista
+
+                $.each(data.result.files, function (index, file) {
+
+                    if (file.url) {
+                        var link = $('<a>')
+                            .attr('target', '_blank')
+                            .prop('href', file.url);
+                        $(data.context.children()[index])
+                            .wrap(link);
+                    } else if (file.error) {
+                        var error = $('<span class="text-danger"/>').text(file.error);
+                        $(data.context.children()[index])
+                            .append('<br>')
+                            .append(error);
+                    }
+                });
+                var progress = 0;
+                $('#progress .progress-bar').css('width', progress + '%');
+                $('#progress').css('display', 'none');
+
+            }).on('fileuploadfail', function (e, data) {
+                console.log('Aconteceu um erro no upload');
+                var progress = 0;
+                $('#progress .progress-bar').css('width', progress + '%');
+                $('#progress').css('display', 'none');
+
+                $.each(data.files, function (index) {
+                    var error = $('<span class="text-danger"/>').text('File upload failed.');
+                    $(data.context.children()[index])
+                        .append('<br>')
+                        .append(error);
+                });
+            }).prop('disabled', !$.support.fileInput)
+        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+
+        };
+
+
 
         $("#btnSalvarContinuar").click(function () {
             $('#btnSalvarContinuar').attr("disabled", true);
@@ -180,6 +305,20 @@
             $('#btnSalvarContinuar').attr("disabled", false);
             $('#btnSalvarContinuar').attr("value", 'Salvar/Continuar');
         });
+
+        function DesabilitaBotoes() {
+            $('#btnSalvarContinuar').attr("disabled", true);
+            $('#btnNovoLote').attr("disabled", true);
+            $('#btnNovaCaixa').attr("disabled", true);
+            $('#btnLimpar').attr("disabled", true);
+        };
+
+        function HabilitaBotoes() {
+            $('#btnSalvarContinuar').attr("disabled", false);
+            $('#btnNovoLote').attr("disabled", false);
+            $('#btnNovaCaixa').attr("disabled", false);
+            $('#btnLimpar').attr("disabled", false);
+        };
 
         $("#btnNovoLote").click(function () {
             $('#btnNovoLote').attr("disabled", true);
@@ -284,9 +423,41 @@
                     $("#idTipoDocumento").val(data.IdTipoDocumento);
                     $("#txtDataDocumento").val(data.DataDocumento);
                     $("#idDocumentoEmEdicao").val(data.IdDocumento);
+                    MontarListaAnexosDocumento(data.IdDocumento);
                 },
                 error: function () {
                     ExibirMensagemErro("Preencha corretamente os descritores obrigatórios.", "Erro. Favor Preencher corretamente todos os campos.<br/> Verifique se os descritores Obrigatórios estão preenchidos.");
+                }
+            });
+        };
+
+        function MontarListaAnexosDocumento(idDocumento) {
+            $.ajax({
+                url: '@urlGetListaAnexosDocumento',
+                type: 'POST',
+                data: {
+                    idDocumento: idDocumento
+                },
+                datatype: 'json',
+                success: function (data) {
+                    console.log(data);
+                    // insere uma lista do arquivo que foi subido para o site.
+                    var divArquivos = $('<div/>').appendTo('#fileslist');
+                    $.each(data, function (key, value) {
+                        //var tamanho = (file.length / 1024);
+                        var node = $('<p data-nomearquivo="' + value + '"/>')
+                                .append($('<span/>').text(value))
+                                .append($(' <a href="javascript:void(0);"  data-nomedocumento="' + value + '" class="btn btn-danger btn-xs pull-right" onclick="removerItemAnexo(this.getAttribute(\'data-nomedocumento\'))"> <i  class="fa fa-times fa-lg"> </i> </a>'))
+                                //.append($('<span class="pull-right"/>').text(tamanho.toFixed(2) + ' KB  '))
+                        ;
+
+                        node.appendTo(divArquivos);
+                    });
+                    //fim da lista
+
+                },
+                error: function () {
+                    ExibirMensagemErro("Ocorreu um erro ao carregar os anexos do documento", "Ocorreu um erro ao carregar os anexos do documento selecionado. <br> Favor entrar em contrato com o administrador do sistema.");
                 }
             });
         };
@@ -350,15 +521,35 @@
             $('#divDocumentosLote').html('');
             var tabela = "";
             tabela = ' <table class="table"><tbody><tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width: 80px">Ações</th></tr>';
+            
             $.each(dados, function () {
+
                 tabela = tabela + '<tr>';
                 tabela = tabela + '<td>' + this.SequencialDocumentoLote + '</td>';
                 tabela = tabela + '<td>' + this.DescricaoDocumento + '</td>';
                 tabela = tabela + '<td>' + this.DescricaoTipoDocumento + '</td>'
-                tabela = tabela + '<td style="white-space: nowrap;" aligh="center"><input class="btnEditar" type="button" value="Editar"  data-iddocumento="' + this.IdDocumento + '" </input> &nbsp; <input class="btnExcluir" type="button" value="Excluir"  data-iddocumento="' + this.IdDocumento + '" </input>';
+                tabela = tabela + '<td style="white-space: nowrap;" aligh="center"><input class="btn btn-primary btn-xs btnEditar" type="button" value="Editar"  data-iddocumento="' + this.IdDocumento + '" </input> &nbsp; <input class="btn btn-danger btn-xs btnExcluir" type="button" value="Excluir"  data-iddocumento="' + this.IdDocumento + '" </input>';
+                console.log(this);
                 if (this.TemAnexo) {
-                   // tabela = tabela + '<br><br> <input class="btnDownloadAnexo" type="button" value="Anexo" data-iddocumento="' + this.IdDocumento + '" />';
-                    tabela = tabela + '<br><br> <a href="@urlDonwloadFile/' + this.IdDocumento + '" target="_blank" class="btnDownloadAnexo" > <i class="fa fa-paperclip fa-2x"></i>  </a>';
+                    // tabela = tabela + '<br><br> <input class="btnDownloadAnexo" type="button" value="Anexo" data-iddocumento="' + this.IdDocumento + '" />';
+                    tabela = tabela + '<br><br>';
+
+                    tabela = tabela + '<div class="dropdown">';
+                    tabela = tabela + '<button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropDownAnexos" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                    tabela = tabela + 'Anexos';
+                    tabela = tabela + '<span class="caret"></span>';
+                    tabela = tabela + '</button>';
+                    tabela = tabela + '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropDownAnexos">';
+                    tabela = tabela + '<li class="dropdown-header">Selecione o arquivo desejado para efetuar download</li>';
+                    
+                    $.each(this.ListaAnexos, function (key, value) {
+                        tabela = tabela + '<li><a href="@urlDonwloadFile/' + key + '" target="_blank">' + value + '</a></li>';
+                    });
+                    tabela = tabela + '</ul>';
+                    tabela = tabela + '</div>';
+
+                    // linha original para montar o icone que baixa os arquivos.
+                    //tabela = tabela + '<br><br> <a href="@urlDonwloadFile/' + this.IdDocumento + '" target="_blank" class="btnDownloadAnexo" > <i class="fa fa-paperclip fa-2x"></i>  </a>';
                     //console.log('<br><br> <a href="@urlDonwloadFile/' + this.IdDocumento + '" target="_blank" class="btnDownloadAnexo" > <i class="fa fa-paperclip fa-2x"></i>  </a>');
                 }
                 tabela = tabela + '  </td>'
@@ -392,8 +583,25 @@
         }
 
         function EfetuarUploadAnexo(idDocumento) {
+            var element = document.querySelectorAll('[data-nomearquivo]');
+            for (var i = 0; i < element.length; i++) {
+                var nome = element[i].getAttribute('data-nomearquivo');
+                $.ajax({
+                    url: '@urlAssociarDocumentoAnexo',
+                    type: 'POST',
+                    data: {
+                        id: idDocumento,
+                        nomeArquivo: nome
+                    },
+                    datatype: 'json',
+                    success: function (data) { },
+                    error: function (data) {
+                        alert(data.message);
+                    }
+                });
+            }
 
-            var data = new FormData();
+            @*var data = new FormData();
 
             var files = $("#txtUploadFile").get(0).files;
 
@@ -413,32 +621,10 @@
             });
 
             ajaxRequest.done(function (xhr, textStatus) {
-               // alert('Upload Efetuado com sucesso. ');
-            });
-
-            @*var formData = new FormData($("#txtUploadFile")[0]);
-            console.log('-------- log do arquivo anexo --------');
-            console.log(formData);
-            console.log('-------- Fim log do arquivo anexo --------');
-            $.ajax({
-                url: "@urlUploadAnexo",
-                type: 'POST',
-                data: {
-                    IdDocumento : idDocumento,
-                    fileUpload : formData
-                },
-                async: false,
-                success: function (data) {
-                    alert("upload ok. ");
-
-                },
-                error: function(){
-                    alert("Erro ao fazer upload do arquivo. ");
-                },
-                cache: false,
-                contentType: false,
-                processData: false
+                // alert('Upload Efetuado com sucesso. ');
             });*@
+
+
 
         }
 
@@ -447,7 +633,7 @@
             $('#btnSalvarContinuar').attr("disabled", true);
             $('#btnSalvarContinuar').attr("value", 'Salvando... ');
 
-            
+
             EsconderMensagemErro();
             var varidCliente = $("#IdClienteTipoDocumento").val();
             var varIdDocumento = $("#idDocumentoEmEdicao").val();
@@ -477,11 +663,22 @@
                     EfetuarUploadAnexo(data.Id);
 
                     // montar a lista de todos documentos no mesmo lote.
-                    PreencheDocumentosDoLote(data.Dados);
+                    $.ajax({
+                        url: '@urlDocumentosDoMesmoLote',
+                        type: 'POST',
+                        data: { IdLote: varidLote },
+                        datatype: 'json',
+                        success: function (data) {
+                            PreencheDocumentosDoLote(data);
+                        }
+                    });
+
+                    //PreencheDocumentosDoLote(data.Dados);
                     // limpar os campos de texto.
                     for (var i = 0; i < listaImputs.length; i++) {
                         listaImputs[i].value = '';
                     }
+                    $("#fileslist").html('');
                     $("#idDocumentoEmEdicao").val('');
                     $("#divDescritores").find("input.primeiroDescritor").focus();
                 },
@@ -493,7 +690,7 @@
             $('#btnSalvarContinuar').attr("disabled", false);
             $('#btnSalvarContinuar').attr("value", 'Salvar/Continuar');
 
-           
+
         }
 
         $("#btnLimpar").click(function () {
@@ -688,7 +885,7 @@
                 type: 'POST',
                 data: { IdLote: $(this).val() },
                 datatype: 'json',
-                success: function (data) {
+                success: function (data) {                    
                     PreencheDocumentosDoLote(data);
                 }
             });
@@ -739,11 +936,57 @@
 
             });
         });
+    });
 
+    $(document).ready(function () {
+        'use strict';
+        // Change this to the location of your server-side upload handler:
+        // ReSharper disable once UseOfImplicitGlobalInFunctionScope
+        var url = '/home/upload';
+        //$('#progress .progress-bar').show();
+        $('#fileupload').fileupload({
+            url: url,
+            dataType: 'json',
+            acceptFileTypes: /(\.|\/)(jpe?g|png)$/i,
+            maxFileSize: 15000000, // 15 MB
+            done: function (e, data) {
+                if (data.result.name == "error") {
+                    alert(data.result.thumbnailUrl);
+                } else {
+                    //$("#viewImgFull").attr("style", "width: 100%!important").removeAttr("style");
+                    $("#imgFullName").val(data.result.name);
+                    $("#viewImgFull").attr("src", data.result.thumbnailUrl);
 
+                    if (data.result.imageHeight < 1080) {
+                        var widthFullHd = 1920;
+                        //var heightFullHd = 1080;
+
+                        var tamanhoDaImagem = data.result.imageWidth;
+                        //var alturaDaImagem = $("#viewImgFull").height();
+                        var tamanhoParaExibir = parseInt((tamanhoDaImagem * 100) / widthFullHd);
+                        $("#viewImgFull").attr("style", "width:" + tamanhoParaExibir + "%!important");
+                    }
+                }
+            },
+            progressall: function (e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress .progress-bar').css(
+                    'width',
+                    progress + '%'
+                );
+
+                //if (progress == 100) {
+                //    $('#progress .progress-bar').hide();
+                //}
+            }
+        }).prop('disabled', !$.support.fileInput)
+            .parent().addClass($.support.fileInput ? undefined : 'disabled');
 
     });
+
 </script>
+
+
 
 @using (Html.BeginForm())
 {
@@ -923,6 +1166,8 @@
                     <input type="button" value="Fechar Caixa" class="btn btn-primary" />*@
             </div>
         </div>
+              
+
     </div>
 
     <div class="row">

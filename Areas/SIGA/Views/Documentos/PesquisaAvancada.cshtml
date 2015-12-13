@@ -223,13 +223,13 @@
                 },
                 headers: { 'Content-Type': 'application/json; charset=utf-8' }
             })
-            .success(function (data) {                
+            .success(function (data) {
                 $scope.erroBusca = 0;
                 if (data == '') {
                     $scope.erroBusca = 1;
                 }
                 $scope.Documentos = data;
-                $scope.QuantidadeDocumentos = data.length;                
+                $scope.QuantidadeDocumentos = data.length;
                 $scope.exibirCarregando = false;
             }).error(function (data) {
                 $scope.erroBusca = 1;
@@ -353,7 +353,7 @@
                     <div id="divDocumentos">
                         <table class="table">
                             <tbody>
-                                <tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width: 80px">Ações</th></tr>
+                                <tr><th>#</th><th>Descrição</th><th>Tipo</th><th style="width:400px">Ações</th></tr>
                                 <tr ng-repeat="doc in Documentos" ng-class="doc.CssTelaPesquisa">
                                     <td>
                                         <div>
@@ -371,13 +371,36 @@
                                         <br />
                                     </td>
                                     <td>{{doc.DescricaoTipoDocumento}} </td>
-                                    <td style="white-space: nowrap;" class="grid-cell action-buttons">
-                                        <span ng-hide="doc.EmprestadoCom == ''">{{doc.EmprestadoCom}} </span>
-                                        <input ng-hide="doc.EmprestadoCom != ''" ng-click="incluirDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Incluir na OS" value="Incluir na OS" data-original-title="Incluir na OS" />
-                                        <input ng-hide="doc.EmprestadoCom == ''" ng-click="devolverDocumentoNaOS(doc.IdDocumento)" type="button" class="btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Devolver Documento" value="Devolver Documento" data-original-title="Devolver Documento" />
-                                        <a ng-hide="permissaoFull == true" class="blue ace-icon fa fa-search-plus bigger-140" href="" title="Visualizar"> </a>
-                                        <a ng-hide="permissaoFull == true" class="green ace-icon fa fa-pencil bigger-140" href="@urlEditar{{doc.IdDocumento}}" target="_blank" title="Editar"> </a>
-                                        <a ng-hide="doc.TemAnexo == false" class="red ace-icon fa fa-paperclip bigger-140" href="@urlDonwloadFile/{{doc.IdDocumento}}" target="_blank" title="Anexo"> </a>
+                                    <td style="white-space: nowrap; width: 200px;" class="grid-cell action-buttons">
+                                        <div>
+                                            <div class="col-md-6" ng-hide="doc.EmprestadoCom == ''">
+                                                <div class="wordwrap">{{doc.EmprestadoCom}} </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input ng-hide="doc.EmprestadoCom != ''" ng-click="incluirDocumentoNaOS(doc.IdDocumento)" type="button" class="btn btn-primary btn-sm btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Incluir na OS" value="Incluir na OS" data-original-title="Incluir na OS" />
+                                                <input ng-hide="doc.EmprestadoCom == ''" ng-click="devolverDocumentoNaOS(doc.IdDocumento)" type="button" class="btn btn-warning btn-sm btnAddOS ace-icon fa fa-shopping-cart " data-rel="tooltip" title="Devolver Documento" value="Devolver Documento" data-original-title="Devolver Documento" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="col-md-4 celulaacao">
+                                                    <a ng-hide="permissaoFull == true" class="blue ace-icon fa fa-search-plus bigger-140" href="" title="Visualizar"> </a>
+                                                </div>
+                                                <div class="col-md-4 celulaacao">
+                                                    <a ng-hide="permissaoFull == true" class="green ace-icon fa fa-pencil bigger-140" href="@urlEditar{{doc.IdDocumento}}" target="_blank" title="Editar"> </a>
+                                                </div>
+                                                <div class="col-md-4 celulaacao">
+                                                    <div class="dropdown" ng-hide="doc.TemAnexo == false">
+                                                        <a class="red ace-icon fa fa-paperclip bigger-140 dropdown-toggle" title="Anexos" id="dropDownAnexos" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
+                                                        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropDownAnexos">
+                                                            <li class="dropdown-header">Selecione o arquivo desejado para efetuar download</li>
+                                                            <li ng-repeat="(key, val) in doc.ListaAnexos">
+                                                                <a href="@urlDonwloadFile/{{key}}" target="_blank">{{val}}</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </td>
                                 </tr>
 
@@ -386,12 +409,12 @@
 
                     </div>
                     <br />
-                    
+
                 </div>
 
             </div>
         </div>
     </div>
-   
+
 
 }
