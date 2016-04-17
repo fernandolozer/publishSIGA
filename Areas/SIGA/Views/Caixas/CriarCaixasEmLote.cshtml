@@ -1,0 +1,193 @@
+﻿
+@{
+    ViewBag.Title = "CriarCaixasEmLote";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var urlMantenedoras = Url.Content("~/SIGA/Documentos/GetTodasMantenedoras");
+    var urlClientes = Url.Content("~/SIGA/Documentos/GetClientesMantenedora");
+    var urlGetGalpoes = Url.Content("~/SIGA/Galpoes/GetListaGalpoes");
+    var urlGetEstruturasGalpao = Url.Content("~/SIGA/EstruturasFisicas/CarregaEstruturasDoGalpao");
+    var urlCriarCaixas = Url.Content("~/SIGA/Caixas/CriarCaixas");
+    var permissaoFull = User.IsInRole("Administrador") || User.IsInRole("Funcionário");
+
+}
+
+<div class="widget-box" ng-controller="CaixasController">
+    <div class="widget-header">
+        <h5 class="widget-title bigger lighter">
+            <i class="ace-icon fa fa-table"></i>
+            Criação de Caixas em Lote
+        </h5>
+    </div>
+
+    <div class="widget-body">
+        <div class="widget-main">
+            <div>
+                <div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6">
+                            <label class="control-label">Mantenedora</label>
+                            <select class="form-control" ng-init="init()" ng-change="loadClientes()" ng-model="MantenedoraSelecionada" ng-options="item.IdMantenedora as item.NomeMantenedora for item in Mantenedoras">
+                                <option value="">[ Selecione ]</option>
+                            </select>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-6">
+                            <label class="control-label">Cliente</label>
+                            <select class="form-control" ng-disabled="Clientes == null" ng-change="loadSetores()" ng-model="ClienteSelecionado" ng-options="item.IdCliente as item.NomeCliente for item in Clientes">
+                                <option value="">[ Selecione ]</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6">
+                            <label class="control-label">Galpão</label>
+                            <select class="form-control" ng-change="loadEstruturas()" ng-model="GalpaoSelecionado" ng-options="item.IdGalpao as item.NomeGalpao for item in Galpoes">
+                                <option value="">[ Selecione ]</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <label class="control-label">Localização (Estrutura Fisica)</label>
+                            <select class="form-control" ng-model="EstruturaSelecionada" ng-options="item.IdEstruturaFisica as item.NomeEstrutura for item in Estrututras">
+                                <option value="">[ Selecione ]</option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6">
+                            <label class="control-label">Caixa Inicial</label>
+                            <input type="number" class="form-control" name="txtCaixaInicial" ng-model="CaixaInicial" placeholder="Caixa Inicial" />
+                        </div>
+                        <div class="col-xs-12 col-sm-6">
+                            <label class="control-label">Caixa Final</label>
+                            <input type="number" class="form-control" name="txtCaixaFinal" ng-model="CaixaFinal" placeholder="Caixa Final" />
+                        </div>
+
+                    </div>
+
+                </div>
+                <br />
+                <div class="row right">
+                    <div class="col-xs-6 col-sm-3">
+                        <input type="button" id="btnCriarCaixas" ng-click="CriarCaixas()" value="Criar Caixas" class="btn btn-primary" />
+                    </div>
+                    <div class="col-xs-6 col-sm-3">
+                        <span ng-show="exibirCarregando == true"><i class="fa fa-3x fa-spinner fa-spin"></i> Processando... </span>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <div ng-repeat="log in LogMensagens">
+                <span>{{log}}</span>
+                <br />
+
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var CaixasController = function ($scope, $http, $rootScope) {
+        // inicializa a variavel com todas as mantenedoras
+        $scope.init = function () {
+            $scope.exibirCarregando = false;
+            $scope.permissaoFull = '@permissaoFull';
+
+            $scope.Clientes = null;
+            $scope.Descritores = null;
+            $scope.Galpoes = null;
+
+            // carregar mantenedoras
+            $http({ method: 'GET', url: '@urlMantenedoras', headers: { 'Content-Type': 'application/json; charset=utf-8' } })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Mantenedoras = data;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Mantenedoras = null;
+            });
+
+            // carregar Galpoes
+            $http({ method: 'GET', url: '@urlGetGalpoes' })
+	            .then(function successCallback(data, status, headers, config) {
+	                $scope.Galpoes = data.data;
+	                console.log(data);
+	            },
+	      	  function errorCallback(data, status, headers, config) {
+	      	      $scope.erroBusca = 1;
+	      	  });
+        };
+
+        $scope.loadEstruturas = function () {
+            $scope.Estrututras = null;
+            // carregar Galpoes
+            $http({ method: 'POST', url: '@urlGetEstruturasGalpao', data: { idGalpao: $scope.GalpaoSelecionado } })
+	            .then(function successCallback(data, status, headers, config) {
+	                $scope.Estrututras = data.data;
+	            },
+	      	  function errorCallback(data, status, headers, config) {
+	      	      $scope.erroBusca = 1;
+	      	  });
+        };
+
+        $scope.loadClientes = function () {
+            $scope.Setores = null;
+            $scope.TiposDocumento = null;
+            $scope.Descritores = null;
+            $scope.exibirCarregando = true;
+            $http({
+                method: 'POST',
+                url: '@urlClientes',
+                data: { idMantenedora: $scope.MantenedoraSelecionada },
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+            .success(function (data) {
+                $scope.erroBusca = 0;
+                if (data == '') {
+                    $scope.erroBusca = 1;
+                }
+                $scope.Clientes = data;
+                $scope.exibirCarregando = false;
+            }).error(function (data) {
+                $scope.erroBusca = 1;
+                $scope.Clientes = null;
+                $scope.exibirCarregando = false;
+            });
+        };
+
+        $scope.CriarCaixas = function () {
+            $scope.LogMensagens = null;
+            $scope.exibirCarregando = true;
+
+            $http({
+                method: 'POST', url: '@urlCriarCaixas',
+                data: {
+                    idCliente: $scope.ClienteSelecionado,
+                    idGalpao: $scope.GalpaoSelecionado,
+                    idEstruturaFisica: $scope.EstruturaSelecionada,
+                    caixaInicial: $scope.CaixaInicial,
+                    caixaFinal: $scope.CaixaFinal
+                }
+            })
+               .then(function successCallback(data, status, headers, config) {
+                   $scope.LogMensagens = data.data;
+                   $scope.exibirCarregando = false;
+
+               },
+             function errorCallback(data, status, headers, config) {
+                 $scope.erroBusca = 1;
+                 $scope.exibirCarregando = false;
+
+             });
+
+        };
+    };
+</script>
